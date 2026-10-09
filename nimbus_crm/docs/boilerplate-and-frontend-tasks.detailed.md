@@ -162,6 +162,18 @@ Create `frontend/` beside `src/`: React, TypeScript, Vite, React Router. Follow 
 - `npm run typecheck`, `npm test` and `npm run build` all pass.
 - Works at phone width (no horizontal page scroll) and can be used with the keyboard only; every input has a label.
 
+## Reference screenshots
+
+What a finished frontend of this scope can look like. They come from a separate Java sample app, **not** from this
+backend, and are a suggestion, not a requirement: your design can differ.
+
+| Sign in | Users list (ADMIN) | Reports with CSV download |
+|---|---|---|
+| ![Sign in](../../fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Users](../../fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports](../../fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+
+More, including error states, a plain-USER view and a phone layout, are in
+[fsd-boilerplate/README.md](../../fsd-boilerplate/README.md#screenshots).
+
 ## 4. Practical notes
 
 ### 4.1 Dev-server proxy

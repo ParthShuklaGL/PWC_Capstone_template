@@ -11,6 +11,7 @@ what every file is for, what has been verified, and where to start.
 - [6. Root files](#6-root-files)
 - [7. What is verified and what is not](#7-what-is-verified-and-what-is-not)
 - [8. Development credentials and secrets](#8-development-credentials-and-secrets)
+- [9. UI reference screenshots](#9-ui-reference-screenshots)
 
 ## 1. What is in this repository
 
@@ -18,7 +19,7 @@ what every file is for, what has been verified, and where to start.
 |---|---|---|
 | [nimbus_crm](nimbus_crm) | **.NET 10 + MySQL 8 backend boilerplate.** Register, sign in and sign out (JWT, HttpOnly cookie or server session behind one rule), CSRF protection, USER and ADMIN roles, an admin user list, four reports with CSV export, an EF Core schema for users, accounts, contacts, deals and activities, development sample data, helper scripts and tests. | Built. 82 automated tests pass against a real MySQL; a scripted live proof ran against the running API. |
 | [nimbus_crm/docs](nimbus_crm/docs) | **The frontend brief for students**, in a detailed and a simple version. | Written. |
-| [fsd-boilerplate](fsd-boilerplate) | **React + Spring Boot + MySQL full-stack sample**: login (JWT, cookie, session), products CRUD, user administration, reports with CSV. | Compiles; 5 JWT unit tests pass. Its login, CRUD and report flows have **not** been run end to end. |
+| [fsd-boilerplate](fsd-boilerplate) | **React + Spring Boot + MySQL full-stack sample**: login (JWT, cookie, session), products CRUD, user administration, reports with CSV. | Run end to end on a throwaway MySQL (API with `curl`, UI in a real browser) with 10 screenshots. Automated tests: only 5 JWT unit tests. |
 | [plan.md](plan.md) | Step-by-step plan for finishing the projects. | Working document. |
 
 What this repository is **not**: there is no frontend for `nimbus_crm`, and `nimbus_crm` has no API yet for
@@ -181,9 +182,10 @@ unless `NIMBUS_TEST_MYSQL` is set (see the nimbus_crm README). Each of those cre
 ## 5. fsd-boilerplate: React + Spring Boot + MySQL sample
 
 A separate, self-contained sample: Spring Boot 3.3 (Java 21) backend, React + TypeScript + Vite frontend, MySQL.
-It shows JWT, cookie and session login side by side, role-based access, products CRUD and a report. It compiles
-and its JWT unit tests pass; **its flows have not been run against a database**, so treat it as a sample, not as
-verified boilerplate. Start at its [README](fsd-boilerplate/README.md).
+It shows JWT, cookie and session login side by side, role-based access, products CRUD and a report. On 2026-10-09 it was
+run end to end against a throwaway MySQL (every flow through the API, and the screens in a real browser); its README lists
+what was checked. It has only 5 automated tests (for the JWT code), so treat it as a verified sample, not as
+production-ready. Start at its [README](fsd-boilerplate/README.md).
 
 | File | What it does |
 |---|---|
@@ -204,6 +206,7 @@ verified boilerplate. Start at its [README](fsd-boilerplate/README.md).
 | [web/ProductController.java](fsd-boilerplate/backend/src/main/java/com/example/fsd/web/ProductController.java) | Products CRUD with search and paging; delete is admin only. |
 | [web/ReportController.java](fsd-boilerplate/backend/src/main/java/com/example/fsd/web/ReportController.java) | Stock reports and a CSV download. |
 | [web/ApiException.java](fsd-boilerplate/backend/src/main/java/com/example/fsd/web/ApiException.java), [ApiExceptionHandler.java](fsd-boilerplate/backend/src/main/java/com/example/fsd/web/ApiExceptionHandler.java), [web/dto/Dtos.java](fsd-boilerplate/backend/src/main/java/com/example/fsd/web/dto/Dtos.java) | One error format, and the request and response shapes. |
+| [docs/screenshots/](fsd-boilerplate/docs/screenshots) | 10 PNG screenshots of the running UI (see section 9). |
 | [JwtServiceTest.java](fsd-boilerplate/backend/src/test/java/com/example/fsd/JwtServiceTest.java) | 5 tests: valid, tampered, wrong-key, expired and garbage tokens. |
 | [frontend/package.json](fsd-boilerplate/frontend/package.json), [package-lock.json](fsd-boilerplate/frontend/package-lock.json), [tsconfig.json](fsd-boilerplate/frontend/tsconfig.json), [vite.config.ts](fsd-boilerplate/frontend/vite.config.ts), [index.html](fsd-boilerplate/frontend/index.html) | Frontend project setup; Vite proxies `/api` to the Spring Boot server. |
 | [frontend/src/api.ts](fsd-boilerplate/frontend/src/api.ts) | Every call to the backend, the three login modes, and error handling in one place. |
@@ -228,7 +231,7 @@ verified boilerplate. Start at its [README](fsd-boilerplate/README.md).
 | `nimbus_crm` on a real developer database | **Not yet.** The proof used a throwaway database; the migration has not been applied to a machine's own MySQL. |
 | `nimbus_crm` frontend | **Does not exist.** Students build it from the brief. |
 | `nimbus_crm` API for accounts, contacts, deals, activities | **Does not exist yet.** The tables, sample data and reports do. |
-| `fsd-boilerplate` | Compiles, 5 JWT tests pass; flows **not** run. |
+| `fsd-boilerplate` | Verified on a throwaway MySQL on 2026-10-09: register and three sign-in modes (reload and sign-out too), products CRUD with search, paging and validation, user administration with its safeguards, roles (401 / 403 / 200), reports and CSV. Only 5 automated tests exist (JWT unit tests). A copied cookie or JWT keeps working after sign-out until it expires. |
 | Known limits of `nimbus_crm` | Sessions are held in memory (a restart ends session sign-ins, several instances do not share them); a deactivation or role change can take up to 30 seconds to reach a signed-in user; no multi-factor sign-in or password reset. The nimbus_crm README lists the rest. |
 
 ## 8. Development credentials and secrets
@@ -241,3 +244,25 @@ verified boilerplate. Start at its [README](fsd-boilerplate/README.md).
 - **`fsd-boilerplate` also ships development defaults:** a default database password, JWT signing secret and
   seed-user passwords in `application.yml`, and a default MySQL root password in `docker-compose.yml`. These
   are public. Set your own through environment variables before running it anywhere that is not your own laptop.
+
+## 9. UI reference screenshots
+
+These show **how a finished frontend of this scope can look**. They come from the running `fsd-boilerplate`
+sample (React + TypeScript), not from `nimbus_crm`, which has no frontend of its own. The screens match what the
+student brief asks for: sign-in with a choice of method, role-aware navigation, an admin user list, and a reports
+page with CSV download. The layout and styling are suggestions; students may design their own.
+
+| Sign in | Sign in, wrong password |
+|---|---|
+| ![Sign-in form](fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Wrong password message](fsd-boilerplate/docs/screenshots/02-sign-in-wrong-password.png) |
+
+| Users list (ADMIN only) | Reports with CSV download |
+|---|---|
+| ![Users screen](fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports screen](fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+
+| The same data screen for an ADMIN | ...and for a plain USER (no Delete, no Users tab) |
+|---|---|
+| ![Products as admin](fsd-boilerplate/docs/screenshots/04-products-admin.png) | ![Products as user](fsd-boilerplate/docs/screenshots/09-products-user-limited.png) |
+
+All ten screenshots, with captions, are in [fsd-boilerplate/README.md](fsd-boilerplate/README.md#screenshots) and
+the files are in [fsd-boilerplate/docs/screenshots](fsd-boilerplate/docs/screenshots).

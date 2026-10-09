@@ -79,7 +79,7 @@ function LoginForm({ onSignedIn }: { onSignedIn: (user: User, mode: AuthMode) =>
       <button type="submit" disabled={busy}>
         {busy ? 'Please wait…' : creating ? 'Create account and sign in' : 'Sign in'}
       </button>
-      <button type="button" className="link" onClick={() => setCreating(!creating)}>
+      <button type="button" className="link" onClick={() => { setCreating(!creating); setError(''); }}>
         {creating ? 'I already have an account' : 'Create an account'}
       </button>
       {!creating && <p className="hint">Demo: admin / Admin#12345 or demo / User#12345</p>}

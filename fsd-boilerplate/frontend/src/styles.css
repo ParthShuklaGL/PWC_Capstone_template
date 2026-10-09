@@ -76,5 +76,5 @@ td.actions button { margin-left: 4px; }
 .stats .card { margin: 0; display: grid; }
 .stats span { color: var(--muted); font-size: 0.85rem; }
 .stats strong { font-size: 1.4rem; }
-.barcell { width: 30%; }
+.barcell { width: 30%; min-width: 90px; }
 .bar-fill { height: 10px; background: var(--accent); border-radius: 4px; min-width: 2px; }

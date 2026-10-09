@@ -74,6 +74,18 @@ Make a `frontend/` folder (React + TypeScript + Vite). Build these five things:
 4. **Where do you keep the JWT?** Memory is safest but lost on reload. `localStorage` survives reload but any script can read it. Pick one and explain why in your write-up.
 5. **The server says the same thing for every failed sign-in.** Do the same; do not write "this user does not exist".
 
+## Reference screenshots
+
+What a finished frontend of this scope can look like. They come from a separate Java sample app, **not** from this
+backend, and are a suggestion, not a requirement: your design can differ.
+
+| Sign in | Users list (ADMIN) | Reports with CSV download |
+|---|---|---|
+| ![Sign in](../../fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Users](../../fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports](../../fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+
+More, including error states, a plain-USER view and a phone layout, are in
+[fsd-boilerplate/README.md](../../fsd-boilerplate/README.md#screenshots).
+
 ## How to check your own work
 
 - Sign in with each of the three methods. After signing out, the old sign-in must stop working.
