@@ -115,6 +115,25 @@ implementation, in [docs/screenshots](docs/screenshots). The reference source is
 The files are `01-sign-in`, `02-sign-in-wrong-password`, `03-register-validation`, `04-reports-admin`, `05-users-admin`,
 `06-reports-user`, `07-no-access`, `08-session-ended` and `09-reports-phone-dark`.
 
+Two more show the API's own documentation page (`/scalar`, Development only), which lists every endpoint including the
+accounts, contacts and deals CRUD, and the real response shapes:
+
+| All endpoints, grouped | Creating a deal: request body, stage values, and the documented 201 / 400 / 401 / 404 responses |
+|---|---|
+| ![API docs: endpoints](docs/screenshots/10-api-docs-endpoints.png) | ![API docs: create deal](docs/screenshots/11-api-docs-create-deal.png) |
+
+## Proof that it works
+
+Evidence from real runs, kept in the repository so a reviewer does not have to take our word for it:
+
+| File | What it shows |
+|---|---|
+| [docs/proof/crud-proof-output.txt](docs/proof/crud-proof-output.txt) | The output of [scripts/crud-proof.sh](scripts/crud-proof.sh) against the running API: every request with its status code and response body. Covers 401 anonymous, create (201), field-error 400s, 404 and 409 with codes, the deal close-date rules, case-insensitive filters, ADMIN-only delete (403 for a USER), and CSRF on cookie sign-in. |
+| [docs/proof/test-results.txt](docs/proof/test-results.txt) | `dotnet test` output listing each of the 100 tests (11 unit, 89 integration) by name, all passed, against a throwaway MySQL 8.0. |
+| [docs/openapi.json](docs/openapi.json) | The API's OpenAPI contract (20 paths), exported from the running API. Use it to generate a typed client or mock server. Regenerate it with `GET /openapi/v1.json` while the API runs in Development. |
+
+The runs used a temporary database, not a developer's own MySQL.
+
 ## Tests
 
 `dotnet test nimbus_crm.slnx` runs everything that needs no database (56 tests). The 44 tests that run the report, login, lockout, revocation, credential and accounts, contacts and deals checks against a real MySQL are skipped until you point them at a server whose account may create and drop databases:

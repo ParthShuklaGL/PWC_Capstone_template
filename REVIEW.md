@@ -56,6 +56,10 @@ Folder: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/nimbus_
 7. [No access](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/07-no-access.png)
 8. [Session ended](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/08-session-ended.png)
 9. [Phone, dark mode](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/09-reports-phone-dark.png)
+10. [API documentation: all endpoints, including accounts, contacts and deals](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/10-api-docs-endpoints.png)
+11. [API documentation: creating a deal (request body and documented responses)](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/11-api-docs-create-deal.png)
+
+Screenshots 1 to 9 are of a reference frontend; 10 and 11 are the API's own documentation page. There are no frontend screens for accounts, contacts or deals yet.
 
 ### Java FSD
 
@@ -81,6 +85,10 @@ Folder: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/fsd-boi
 ## 5. Verification status
 
 - .NET CRM: 100 automated tests pass against a throwaway MySQL (11 unit, 89 integration), and the accounts, contacts and deals API was exercised with real HTTP requests (statuses, bodies, roles, CSRF). The reference frontend passed 37 unit tests and 37 real-browser checks against the API before the CRUD was added; it has no screens for the CRUD yet.
+- Evidence files for the .NET CRM, in the repository:
+  - [Live request and response log for the CRUD API](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/proof/crud-proof-output.txt) (status codes and bodies, roles, validation, CSRF).
+  - [Full test listing](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/proof/test-results.txt) (100 tests by name, all passed).
+  - [OpenAPI contract](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/openapi.json) exported from the running API (20 paths).
 - Java FSD: backend compiles and 5 JWT tests pass. Its user stories F1 to F16 were checked in a browser (see its user-stories.md).
 - Not yet done: the .NET migration has not been applied to the author's own MySQL instance; everything above ran on throwaway databases.
 

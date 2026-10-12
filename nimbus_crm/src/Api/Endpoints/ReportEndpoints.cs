@@ -17,6 +17,7 @@ public static class ReportEndpoints
     {
         // Report data changes constantly and is business-sensitive: never let a cache keep a copy.
         var reports = app.MapGroup("/api/reports")
+            .WithTags("Reports")
             .RequireAuthorization()
             .AddEndpointFilter<NoStoreEndpointFilter>();
 

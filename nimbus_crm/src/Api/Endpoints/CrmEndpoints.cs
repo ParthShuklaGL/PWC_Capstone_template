@@ -16,6 +16,8 @@ public static class CrmEndpoints
     ///   PUT    /api/{resource}/{id}                         the whole row again; 200 and the saved row
     ///   DELETE /api/{resource}/{id}                         204; ADMIN only
     /// Every route needs a signed-in caller. Changes made with a cookie or session also need the CSRF token.
+    /// The Produces calls describe the real responses so the OpenAPI document (and any typed client generated
+    /// from it) matches what the API sends.
     /// </summary>
     public static IEndpointRouteBuilder MapCrmEndpoints(this IEndpointRouteBuilder app)
     {
@@ -24,53 +26,89 @@ public static class CrmEndpoints
             .AddEndpointFilter<NoStoreEndpointFilter>()
             .AddEndpointFilter<CsrfEndpointFilter>();
 
-        var accounts = crm.MapGroup("/accounts");
+        var accounts = crm.MapGroup("/accounts").WithTags("Accounts");
         accounts.MapGet("/", async (ISender sender, CancellationToken ct, int page = 0, int size = 20, string? search = null) =>
-            Results.Ok(await sender.Send(new ListAccountsQuery(page, size, search), ct)));
+                Results.Ok(await sender.Send(new ListAccountsQuery(page, size, search), ct)))
+            .Lists<AccountDto>();
         accounts.MapGet("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new GetAccountQuery(id), ct)));
+                Respond(await sender.Send(new GetAccountQuery(id), ct)))
+            .Reads<AccountDto>();
         accounts.MapPost("/", async (AccountInput input, ISender sender, CancellationToken ct) =>
-            Created("/api/accounts", await sender.Send(new CreateAccountCommand(input), ct), account => account.Id));
+                Created("/api/accounts", await sender.Send(new CreateAccountCommand(input), ct), account => account.Id))
+            .Creates<AccountDto>();
         accounts.MapPut("/{id:long}", async (long id, AccountInput input, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new UpdateAccountCommand(id, input), ct)));
+                Respond(await sender.Send(new UpdateAccountCommand(id, input), ct)))
+            .Updates<AccountDto>();
         accounts.MapDelete("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            NoContent(await sender.Send(new DeleteAccountCommand(id), ct)))
-            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy);
+                NoContent(await sender.Send(new DeleteAccountCommand(id), ct)))
+            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy)
+            .Deletes();
 
-        var contacts = crm.MapGroup("/contacts");
+        var contacts = crm.MapGroup("/contacts").WithTags("Contacts");
         contacts.MapGet("/", async (ISender sender, CancellationToken ct,
-                int page = 0, int size = 20, string? search = null, long? accountId = null, string? status = null) =>
-            TryParseName<ContactStatus>(status, "status", out var parsedStatus, out var badStatus)
-                ? Results.Ok(await sender.Send(new ListContactsQuery(page, size, search, accountId, parsedStatus), ct))
-                : badStatus);
+                    int page = 0, int size = 20, string? search = null, long? accountId = null, string? status = null) =>
+                TryParseName<ContactStatus>(status, "status", out var parsedStatus, out var badStatus)
+                    ? Results.Ok(await sender.Send(new ListContactsQuery(page, size, search, accountId, parsedStatus), ct))
+                    : badStatus)
+            .Lists<ContactDto>();
         contacts.MapGet("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new GetContactQuery(id), ct)));
+                Respond(await sender.Send(new GetContactQuery(id), ct)))
+            .Reads<ContactDto>();
         contacts.MapPost("/", async (ContactInput input, ISender sender, CancellationToken ct) =>
-            Created("/api/contacts", await sender.Send(new CreateContactCommand(input), ct), contact => contact.Id));
+                Created("/api/contacts", await sender.Send(new CreateContactCommand(input), ct), contact => contact.Id))
+            .Creates<ContactDto>();
         contacts.MapPut("/{id:long}", async (long id, ContactInput input, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new UpdateContactCommand(id, input), ct)));
+                Respond(await sender.Send(new UpdateContactCommand(id, input), ct)))
+            .Updates<ContactDto>();
         contacts.MapDelete("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            NoContent(await sender.Send(new DeleteContactCommand(id), ct)))
-            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy);
+                NoContent(await sender.Send(new DeleteContactCommand(id), ct)))
+            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy)
+            .Deletes();
 
-        var deals = crm.MapGroup("/deals");
+        var deals = crm.MapGroup("/deals").WithTags("Deals");
         deals.MapGet("/", async (ISender sender, CancellationToken ct,
-                int page = 0, int size = 20, string? search = null, string? stage = null, long? contactId = null, long? accountId = null) =>
-            TryParseName<DealStage>(stage, "stage", out var parsedStage, out var badStage)
-                ? Results.Ok(await sender.Send(new ListDealsQuery(page, size, search, parsedStage, contactId, accountId), ct))
-                : badStage);
+                    int page = 0, int size = 20, string? search = null, string? stage = null, long? contactId = null, long? accountId = null) =>
+                TryParseName<DealStage>(stage, "stage", out var parsedStage, out var badStage)
+                    ? Results.Ok(await sender.Send(new ListDealsQuery(page, size, search, parsedStage, contactId, accountId), ct))
+                    : badStage)
+            .Lists<DealDto>();
         deals.MapGet("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new GetDealQuery(id), ct)));
+                Respond(await sender.Send(new GetDealQuery(id), ct)))
+            .Reads<DealDto>();
         deals.MapPost("/", async (DealInput input, ISender sender, CancellationToken ct) =>
-            Created("/api/deals", await sender.Send(new CreateDealCommand(input), ct), deal => deal.Id));
+                Created("/api/deals", await sender.Send(new CreateDealCommand(input), ct), deal => deal.Id))
+            .Creates<DealDto>();
         deals.MapPut("/{id:long}", async (long id, DealInput input, ISender sender, CancellationToken ct) =>
-            Respond(await sender.Send(new UpdateDealCommand(id, input), ct)));
+                Respond(await sender.Send(new UpdateDealCommand(id, input), ct)))
+            .Updates<DealDto>();
         deals.MapDelete("/{id:long}", async (long id, ISender sender, CancellationToken ct) =>
-            NoContent(await sender.Send(new DeleteDealCommand(id), ct)))
-            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy);
+                NoContent(await sender.Send(new DeleteDealCommand(id), ct)))
+            .RequireAuthorization(AuthenticationExtensions.AdminOnlyPolicy)
+            .Deletes();
 
         return app;
     }
+
+    // ---- what each kind of route really returns, for the OpenAPI document ----
+
+    private static RouteHandlerBuilder Lists<T>(this RouteHandlerBuilder route) =>
+        route.Produces(StatusCodes.Status401Unauthorized).Produces<PagedResult<T>>(StatusCodes.Status200OK).ProducesValidationProblem();
+
+    private static RouteHandlerBuilder Reads<T>(this RouteHandlerBuilder route) =>
+        route.Produces(StatusCodes.Status401Unauthorized).Produces<T>(StatusCodes.Status200OK).ProducesProblem(StatusCodes.Status404NotFound);
+
+    private static RouteHandlerBuilder Creates<T>(this RouteHandlerBuilder route) =>
+        route.Produces(StatusCodes.Status401Unauthorized).Produces<T>(StatusCodes.Status201Created).ProducesValidationProblem().ProducesProblem(StatusCodes.Status404NotFound);
+
+    private static RouteHandlerBuilder Updates<T>(this RouteHandlerBuilder route) =>
+        route.Produces(StatusCodes.Status401Unauthorized).Produces<T>(StatusCodes.Status200OK).ProducesValidationProblem().ProducesProblem(StatusCodes.Status404NotFound);
+
+    private static RouteHandlerBuilder Deletes(this RouteHandlerBuilder route) =>
+        route.Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
 
     /// <summary>
     /// Reads a stage or status filter such as ?stage=WON. The framework's own binding is case-sensitive and would

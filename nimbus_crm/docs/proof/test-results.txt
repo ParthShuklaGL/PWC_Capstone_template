@@ -1,0 +1,128 @@
+# dotnet test output (detailed): all tests, run against a throwaway MySQL 8.0 on 2026-10-12 (UTC). Paths shortened.
+
+Test run for <repo>\nimbus_crm\tests\UnitTests\bin\Debug\net10.0\NimbusCrm.UnitTests.dll (.NETCoreApp,Version=v10.0)
+Test run for <repo>\nimbus_crm\tests\IntegrationTests\bin\Debug\net10.0\NimbusCrm.IntegrationTests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+<repo>\nimbus_crm\tests\UnitTests\bin\Debug\net10.0\NimbusCrm.UnitTests.dll
+A total of 1 test files matched the specified pattern.
+<repo>\nimbus_crm\tests\IntegrationTests\bin\Debug\net10.0\NimbusCrm.IntegrationTests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.2)
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 10.0.2)
+[xUnit.net 00:00:00.59]   Discovering: NimbusCrm.UnitTests
+[xUnit.net 00:00:00.66]   Discovered:  NimbusCrm.UnitTests
+[xUnit.net 00:00:00.68]   Starting:    NimbusCrm.UnitTests
+[xUnit.net 00:00:00.70]   Discovering: NimbusCrm.IntegrationTests
+[xUnit.net 00:00:00.83]   Discovered:  NimbusCrm.IntegrationTests
+[xUnit.net 00:00:00.86]   Starting:    NimbusCrm.IntegrationTests
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserAcceptsTheThreeNamesInAnyCase(text: "cookie", expected: Cookie) [36 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserAcceptsTheThreeNamesInAnyCase(text: "SESSION", expected: Session) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserAcceptsTheThreeNamesInAnyCase(text: "Jwt", expected: Jwt) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserAcceptsTheThreeNamesInAnyCase(text: "  Cookie  ", expected: Cookie) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "1") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "99") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: null) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "2") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "Cookie,Jwt") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "-5") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: " 1 ") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "Carrier-pigeon") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.AuthModeParserRefusesNumbersListsAndUnknownNames(text: "   ") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.TheSameCharactersAsTextStillGetTheFormulaGuard [45 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ATooShortOrRepetitiveSigningKeyIsRejectedWithAReason(key: "abababababababababababababababababababab") [20 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ATooShortOrRepetitiveSigningKeyIsRejectedWithAReason(key: "0123456789012345678901234567890123456789") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ATooShortOrRepetitiveSigningKeyIsRejectedWithAReason(key: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ATooShortOrRepetitiveSigningKeyIsRejectedWithAReason(key: "") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ATooShortOrRepetitiveSigningKeyIsRejectedWithAReason(key: "short") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.TheValidatorNamesTheSettingThatIsWrongIncludingPreviousKeys [4 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 0, size: 101, valid: False) [109 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 0, size: 0, valid: False) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 10001, size: 20, valid: False) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 2147483647, size: 100, valid: False) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 10000, size: 100, valid: True) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: -1, size: 20, valid: False) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ListUsersPagingIsBoundedSoPageTimesSizeCannotOverflow(page: 0, size: 20, valid: True) [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.AuthLogicTests.ARandomLookingSigningKeyIsAccepted [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.ToCsvFileSendsTheCsvBodyAsAnAttachmentWithTheRightHeaders [172 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.ANegativeNumberStaysANumberAndIsNotDefusedAsText [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.WriteProducesHeadersThenOneLinePerRowWithCrLfEndings [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.CellDefusesTextThatASpreadsheetWouldRunAsAFormula(input: "-2+3", expected: "\"'-2+3\"") [< 1 ms]
+  Passed NimbusCrm.UnitTests.Behaviors.ValidationBehaviorTests.HandleDoesNotCallTheHandlerWhenTheMessageIsInvalid [98 ms]
+  Passed NimbusCrm.UnitTests.Behaviors.ValidationBehaviorTests.HandleCallsTheHandlerWhenTheMessageIsValid [1 ms]
+  Passed NimbusCrm.UnitTests.Behaviors.ValidationBehaviorTests.HandleThrowsWithOneFailurePerInvalidField [15 ms]
+  Passed NimbusCrm.UnitTests.Behaviors.ValidationBehaviorTests.HandlePassesThroughWhenNoValidatorIsRegistered [< 1 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.HashUsesTheConfiguredWorkFactorAndSaysSoInItsHeader [288 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.VerifyRejectsTheWrongPassword [297 ms]
+[xUnit.net 00:00:02.41]   Finished:    NimbusCrm.UnitTests
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.VerifyAcceptsTheRightPassword [317 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.HashDoesNotContainThePassword [181 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.VerifyAcceptsAnOlderWeakerHashAndAsksForItToBeReplaced [111 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.VerifyRejectsAMissingHashWithoutThrowing [200 ms]
+  Passed NimbusCrm.UnitTests.Security.IdentityPasswordHasherTests.HashGivesADifferentValueEachTimeBecauseOfTheSalt [302 ms]
+
+Test Run Successful.
+Total tests: 11
+     Passed: 11
+ Total time: 3.6989 Seconds
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.CellDefusesTextThatASpreadsheetWouldRunAsAFormula(input: "@cmd", expected: "\"'@cmd\"") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.CellDefusesTextThatASpreadsheetWouldRunAsAFormula(input: "=SUM(A1:A9)", expected: "\"'=SUM(A1:A9)\"") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.CellDefusesTextThatASpreadsheetWouldRunAsAFormula(input: "+1+1", expected: "\"'+1+1\"") [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.CellQuotesCommasQuotesAndLineBreaksAndDoublesInnerQuotes [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.CsvExportTests.NumbersAlwaysUseADotAndTwoDecimalsWhateverTheMachineCulture [< 1 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportAuthorizationTests.AdminOnlyPolicyRejectsAPlainUserAndSaysWhichRequirementFailed [297 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportAuthorizationTests.AdminOnlyPolicyAcceptsAnAdmin [3 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportAuthorizationTests.AdminOnlyPolicyRejectsAnAnonymousCaller [1 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.AUserWhoWasPromotedStopsMatchingTheirOldCredential [554 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.RevokingAnAlreadyExpiredCredentialStoresNothing [14 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportQueryTests.DealsByStageAsksMySqlToGroupAndSumInOneCommand [53 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportQueryTests.UsersByRoleCountsEachRoleAndTheTotalMatchesTheTable [36 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportQueryTests.ContactsPerAccountCountsInTheDatabaseAndShowsAccountsWithNoContacts [33 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportQueryTests.DealsByStageReturnsEverySixStagesWithTheirCountsAndValues [7 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.ReportQueryTests.ActivitiesPerUserListsEveryUserMostActiveFirst [12 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.ASignedOutCredentialIsRefusedEvenForAnActiveUser [227 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.TheCleanerDeletesExpiredRowsAndKeepsLiveOnes [28 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.AnUnknownCredentialIsNotRevoked [14 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.AnActiveUserWithTheSameRoleIsAccepted [229 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.AnUnknownUserGetsExactlyTheSameError [254 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.ADeactivationIsNotSeenUntilTheCachedLookupExpires [304 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.AnUnknownUserIsRefused [5 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.ARevokedCredentialStaysRevokedAfterARestart [16 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.SampleDataReportTests.DealsByStageTotalsMatchTheSampleDeals [6 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.SampleDataReportTests.ActivitiesPerUserSplitsTheThirtySampleActivitiesTwentyToTen [17 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.SampleDataReportTests.ContactsPerAccountMatchesTheSampleAccountsAndSumsToAllContacts [8 ms]
+  Passed NimbusCrm.IntegrationTests.Reports.SampleDataReportTests.SampleDataHasTheDocumentedNumberOfRecordsInEveryTable [36 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.ACredentialIssuedForAnotherRoleIsRefused [240 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.PagingRejectsNegativePagesAndOversizedPages [22 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.ADeactivatedUserIsRefused [360 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.RevokingTheSameCredentialTwiceIsHarmless [29 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ADealCanBeDeletedAndThenIsGone [125 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AnAccountWithContactsCannotBeDeletedUntilTheyAreGone [113 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.MissingAccountsAreReportedAsNotFound [12 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.AGoodSignInResetsTheCountOfWrongPasswords [1 s]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AccountListsAreSearchableAndPagedWithATotal [90 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ADealBelongsToAContactThatExists [8 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.EditingAClosedDealKeepsTheOriginalCloseDateAndMovesUpdatedAt [51 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.CredentialLifecycleTests.TheDatabaseRefusesTwoUsersWithTheSameUsernameAndTheApiMapsThatTo409 [418 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AnAccountCanBeCreatedReadUpdatedAndDeleted [60 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AContactMustBelongToAnAccountThatExists [7 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.DealListsFilterByStageAndAccountAndSortByCloseDate [190 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ALostDealMustSayWhyAndAValueMustBeSensible [22 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AContactShowsItsAccountNameAndCanMoveToAnotherAccount [44 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AContactNeedsNamesAValidEmailAndAnAccount [8 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AnAccountNeedsANameAndAWebAddressMustBeFull [3 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ContactListsFilterByAccountStatusAndSearchAndSortBySurname [103 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ADealShowsItsContactAndAccount [25 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.AWeakOldHashIsReplacedWithTheCurrentOneOnTheNextGoodSignIn [581 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.ClosingADealStampsTodayAndReopeningClearsTheCloseDateAndReason [52 ms]
+  Passed NimbusCrm.IntegrationTests.Crm.CrmCrudTests.AContactWithDealsOrActivitiesCannotBeDeleted [83 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.TheRightPasswordSignsIn [512 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.ADeactivatedUserCannotSignInWithTheRightPassword [449 ms]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.TheAccountOpensAgainWhenTheLockoutEndsAndTheRecordIsCleared [1 s]
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.TheFifthWrongPasswordLocksTheAccountEvenAgainstTheRightPassword [1 s]
+[xUnit.net 00:00:10.53]   Finished:    NimbusCrm.IntegrationTests
+  Passed NimbusCrm.IntegrationTests.Auth.LoginLockoutTests.AWrongPasswordIsCountedAndAnswersWithTheGenericError [473 ms]
+
+Test Run Successful.
+Total tests: 89
+     Passed: 89
+ Total time: 11.8891 Seconds

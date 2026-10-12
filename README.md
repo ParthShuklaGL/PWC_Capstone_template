@@ -184,6 +184,9 @@ unless `NIMBUS_TEST_MYSQL` is set (see the nimbus_crm README). Each of those cre
 |---|---|
 | [boilerplate-and-frontend-tasks.simple.md](nimbus_crm/docs/boilerplate-and-frontend-tasks.simple.md) | Plain-language version: what the backend gives you, the five frontend tasks (sign in and out, guards, users list, reports page, tests), five common mistakes, and a hand-in checklist. About 85 lines. |
 | [boilerplate-and-frontend-tasks.detailed.md](nimbus_crm/docs/boilerplate-and-frontend-tasks.detailed.md) | The full brief: every endpoint with request, success and failure codes, the error format, the three sign-in modes and the CSRF steps, five tasks with acceptance criteria, a dev-server proxy snippet, a pitfalls table, a suggested marking guide and a hand-in checklist. About 190 lines. |
+| [openapi.json](nimbus_crm/docs/openapi.json) | The API's OpenAPI contract (20 paths, with the real response shapes), exported from the running API, for generating a typed client or a mock server. |
+| [proof/crud-proof-output.txt](nimbus_crm/docs/proof/crud-proof-output.txt) | Real requests and responses for the accounts, contacts and deals API, produced by `scripts/crud-proof.sh`. |
+| [proof/test-results.txt](nimbus_crm/docs/proof/test-results.txt) | The full `dotnet test` listing: 100 tests, all passed, against a throwaway MySQL 8.0. |
 
 ## 5. fsd-boilerplate: React + Spring Boot + MySQL sample
 
@@ -279,6 +282,14 @@ their own. The files are in [nimbus_crm/docs/screenshots](nimbus_crm/docs/screen
 | A plain USER opens an admin page | Phone width, dark scheme (no sideways page scroll) |
 |---|---|
 | ![No access](nimbus_crm/docs/screenshots/07-no-access.png) | <img src="nimbus_crm/docs/screenshots/09-reports-phone-dark.png" alt="Reports on a phone in dark mode" width="260"> |
+
+**The API documentation page** (Scalar, served by the API in Development) lists every endpoint, including the accounts,
+contacts and deals CRUD that has no frontend screens yet. These two screenshots show the grouped endpoint list and one
+operation in detail (creating a deal: request body, the stage values, and the documented responses).
+
+| All endpoints, grouped | Creating a deal |
+|---|---|
+| ![API docs: endpoints](nimbus_crm/docs/screenshots/10-api-docs-endpoints.png) | ![API docs: create deal](nimbus_crm/docs/screenshots/11-api-docs-create-deal.png) |
 
 ### 9.2 The Java sample (`fsd-boilerplate`)
 
