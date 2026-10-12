@@ -22,7 +22,7 @@ what every file is for, what has been verified, and where to start.
 | [fsd-boilerplate](fsd-boilerplate) | **React + Spring Boot + MySQL full-stack sample**: login (JWT, cookie, session), products CRUD, user administration, reports with CSV. | Run end to end on a throwaway MySQL (API with `curl`, UI in a real browser) with 10 screenshots. Automated tests: only 5 JWT unit tests. |
 | [plan.md](plan.md) | Step-by-step plan for finishing the projects. | Working document. |
 
-What this repository is **not**: there is no frontend for `nimbus_crm`, and `nimbus_crm` has no API yet for
+What this repository is **not**: it holds no frontend source for `nimbus_crm` (students build it from the brief; section 9 shows screenshots of a reference implementation that is deliberately not published), and `nimbus_crm` has no API yet for
 creating or editing accounts, contacts, deals or activities (their tables exist and the reports read them).
 The original capstone starter and its mentor material are not published here.
 
@@ -229,7 +229,7 @@ production-ready. Start at its [README](fsd-boilerplate/README.md).
 | `nimbus_crm` tests | 82 pass: 11 unit and 71 integration, against a throwaway MySQL 8. |
 | `nimbus_crm` live behaviour | Shown with real requests: each sign-in mode alone and together, sign-out and replay, CSRF, roles (401 / 403 / 200), lockout, restart-proof sign-out, deactivation and demotion, CSV output, key rotation, production-mode headers. |
 | `nimbus_crm` on a real developer database | **Not yet.** The proof used a throwaway database; the migration has not been applied to a machine's own MySQL. |
-| `nimbus_crm` frontend | **Does not exist.** Students build it from the brief. |
+| `nimbus_crm` frontend | **Not in this repository.** A reference implementation was built and tested locally (37 unit tests, and 34 checks in a real browser against the running API: three sign-in modes, reload, CSRF sign-out, replay refusal, role views, report numbers, all four CSV downloads, session-ended). Its screenshots are in section 9; its source is deliberately not published. |
 | `nimbus_crm` API for accounts, contacts, deals, activities | **Does not exist yet.** The tables, sample data and reports do. |
 | `fsd-boilerplate` | Verified on a throwaway MySQL on 2026-10-09: register and three sign-in modes (reload and sign-out too), products CRUD with search, paging and validation, user administration with its safeguards, roles (401 / 403 / 200), reports and CSV. Only 5 automated tests exist (JWT unit tests). A copied cookie or JWT keeps working after sign-out until it expires. |
 | Known limits of `nimbus_crm` | Sessions are held in memory (a restart ends session sign-ins, several instances do not share them); a deactivation or role change can take up to 30 seconds to reach a signed-in user; no multi-factor sign-in or password reset. The nimbus_crm README lists the rest. |
@@ -247,22 +247,40 @@ production-ready. Start at its [README](fsd-boilerplate/README.md).
 
 ## 9. UI reference screenshots
 
-These show **how a finished frontend of this scope can look**. They come from the running `fsd-boilerplate`
-sample (React + TypeScript), not from `nimbus_crm`, which has no frontend of its own. The screens match what the
-student brief asks for: sign-in with a choice of method, role-aware navigation, an admin user list, and a reports
-page with CSV download. The layout and styling are suggestions; students may design their own.
+### 9.1 The .NET CRM (`nimbus_crm`): reference frontend
 
-| Sign in | Sign in, wrong password |
+These nine screenshots are of a **reference frontend running against the real `nimbus_crm` API** (React, TypeScript, Vite),
+built to the student brief. They show what a finished solution looks like, so students can see the target. The source is
+**not published**, because it is the answer to the assignment; the layout and styling are suggestions and students may design
+their own. The files are in [nimbus_crm/docs/screenshots](nimbus_crm/docs/screenshots).
+
+| Sign in (three methods) | Wrong password: the same generic message the server gives |
 |---|---|
-| ![Sign-in form](fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Wrong password message](fsd-boilerplate/docs/screenshots/02-sign-in-wrong-password.png) |
+| ![Sign in](nimbus_crm/docs/screenshots/01-sign-in.png) | ![Wrong password](nimbus_crm/docs/screenshots/02-sign-in-wrong-password.png) |
 
-| Users list (ADMIN only) | Reports with CSV download |
+| Register: each server message beside its own field | Credential ended: back to sign-in, with the reason |
 |---|---|
-| ![Users screen](fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports screen](fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+| ![Register validation](nimbus_crm/docs/screenshots/03-register-validation.png) | ![Session ended](nimbus_crm/docs/screenshots/08-session-ended.png) |
 
-| The same data screen for an ADMIN | ...and for a plain USER (no Delete, no Users tab) |
+**Reports as ADMIN**: four reports, each with its own Download CSV button.
+
+![Reports as admin](nimbus_crm/docs/screenshots/04-reports-admin.png)
+
+| Users list (ADMIN only) | The same Reports page for a plain USER (three reports) |
 |---|---|
-| ![Products as admin](fsd-boilerplate/docs/screenshots/04-products-admin.png) | ![Products as user](fsd-boilerplate/docs/screenshots/09-products-user-limited.png) |
+| ![Users](nimbus_crm/docs/screenshots/05-users-admin.png) | ![Reports as user](nimbus_crm/docs/screenshots/06-reports-user.png) |
 
-All ten screenshots, with captions, are in [fsd-boilerplate/README.md](fsd-boilerplate/README.md#screenshots) and
-the files are in [fsd-boilerplate/docs/screenshots](fsd-boilerplate/docs/screenshots).
+| A plain USER opens an admin page | Phone width, dark scheme (no sideways page scroll) |
+|---|---|
+| ![No access](nimbus_crm/docs/screenshots/07-no-access.png) | <img src="nimbus_crm/docs/screenshots/09-reports-phone-dark.png" alt="Reports on a phone in dark mode" width="260"> |
+
+### 9.2 The Java sample (`fsd-boilerplate`)
+
+Screenshots of the separate React + Spring Boot sample, for comparison. They show a similar scope (sign-in with a choice of
+method, role-aware screens, an admin user list, reports with CSV).
+
+| Sign in | Users list (ADMIN only) | Reports with CSV download |
+|---|---|---|
+| ![Sign-in form](fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Users screen](fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports screen](fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+
+All ten, with captions, are in [fsd-boilerplate/README.md](fsd-boilerplate/README.md#screenshots).

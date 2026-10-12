@@ -164,15 +164,15 @@ Create `frontend/` beside `src/`: React, TypeScript, Vite, React Router. Follow 
 
 ## Reference screenshots
 
-What a finished frontend of this scope can look like. They come from a separate Java sample app, **not** from this
-backend, and are a suggestion, not a requirement: your design can differ.
+Screens of a **reference frontend built against this backend**, so you can see the target. Its source is not published, and your
+design can be completely different: these are a suggestion, not a requirement.
 
 | Sign in | Users list (ADMIN) | Reports with CSV download |
 |---|---|---|
-| ![Sign in](../../fsd-boilerplate/docs/screenshots/01-sign-in.png) | ![Users](../../fsd-boilerplate/docs/screenshots/07-users-admin.png) | ![Reports](../../fsd-boilerplate/docs/screenshots/08-reports-admin.png) |
+| ![Sign in](screenshots/01-sign-in.png) | ![Users](screenshots/05-users-admin.png) | ![Reports](screenshots/04-reports-admin.png) |
 
-More, including error states, a plain-USER view and a phone layout, are in
-[fsd-boilerplate/README.md](../../fsd-boilerplate/README.md#screenshots).
+More are in [screenshots/](screenshots): the wrong-password message, field errors beside their inputs, the plain-USER view, the
+"no access" page, the "session ended" notice, and a phone layout in dark mode.
 
 ## 4. Practical notes
 

@@ -79,6 +79,18 @@ The CSV is RFC 4180: comma separated, CRLF line ends, UTF-8 without a byte-order
 
 Sample data: in Development the API also seeds 8 accounts, 20 contacts, 18 deals and 30 activities (78 records with the two users), so every report shows real numbers. It only runs on empty tables, so a restart never duplicates anything. Each activity records the user who logged it (`Activities.UserId`); that is what "activities per user" counts.
 
+## Screenshots
+
+What the frontend described in [docs/](docs) looks like when built against this API: nine screenshots of a reference
+implementation, in [docs/screenshots](docs/screenshots). The reference source is not published; students build their own.
+
+| Sign in | Reports (ADMIN) | Users (ADMIN) |
+|---|---|---|
+| ![Sign in](docs/screenshots/01-sign-in.png) | ![Reports](docs/screenshots/04-reports-admin.png) | ![Users](docs/screenshots/05-users-admin.png) |
+
+The files are `01-sign-in`, `02-sign-in-wrong-password`, `03-register-validation`, `04-reports-admin`, `05-users-admin`,
+`06-reports-user`, `07-no-access`, `08-session-ended` and `09-reports-phone-dark`.
+
 ## Tests
 
 `dotnet test nimbus_crm.slnx` runs everything that needs no database (52 tests). The 30 tests that run the report, login, lockout, revocation and credential checks against a real MySQL are skipped until you point them at a server whose account may create and drop databases:
