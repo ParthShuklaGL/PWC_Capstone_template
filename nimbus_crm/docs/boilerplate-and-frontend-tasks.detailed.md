@@ -7,7 +7,7 @@ This is the detailed version. A shorter, plainer version with the same scope is 
 
 | Part | Who | Status |
 |---|---|---|
-| Backend API (`nimbus_crm/src`), MySQL schema, sample data, tests | Provided (the boilerplate) | Built. Verified on a test database with 82 automated tests and a scripted live proof. |
+| Backend API (`nimbus_crm/src`), MySQL schema, sample data, tests | Provided (the boilerplate) | Built. Verified on a test database with 100 automated tests and a scripted live proof. |
 | Frontend (React + TypeScript + Vite) | **You** | Not started. This document is your brief. |
 
 You do not change the backend. If you think it has a bug, write it down with the request you sent and the response you got.
@@ -95,7 +95,7 @@ JWT requests need no CSRF token.
 ### 2.5 What the boilerplate does *not* give you
 
 - No frontend at all.
-- **No endpoints yet for accounts, contacts, deals or activities.** The tables and the sample data exist (and the reports read them), but there is no create, read, update or delete API for them. The deal list, deal detail, stage-move and pipeline-board screens (US-03 to US-07 in the original CRM brief) need those endpoints and are **not** part of this brief.
+- **Accounts, contacts and deals have a create, read, update and delete API** (see the nimbus_crm README, "Accounts, contacts and deals"), but there is still no API for logging activities. The deal list, deal detail, stage-move and pipeline-board screens (US-03 to US-07 in the original CRM brief) are **not** part of this brief; the API for them is there for a later one.
 - No password reset, email confirmation or multi-factor sign-in.
 
 ## 3. What you build

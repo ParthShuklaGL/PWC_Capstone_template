@@ -79,6 +79,30 @@ The CSV is RFC 4180: comma separated, CRLF line ends, UTF-8 without a byte-order
 
 Sample data: in Development the API also seeds 8 accounts, 20 contacts, 18 deals and 30 activities (78 records with the two users), so every report shows real numbers. It only runs on empty tables, so a restart never duplicates anything. Each activity records the user who logged it (`Activities.UserId`); that is what "activities per user" counts.
 
+## Accounts, contacts and deals (CRUD)
+
+Three resources with the same five routes. Every route needs a signed-in caller; **delete is ADMIN only** (a USER gets 403). A change made with a cookie or session also needs the CSRF token (see above); Bearer does not.
+
+| Method and route | What it does | Success |
+|---|---|---|
+| `GET /api/{resource}?page=0&size=20&search=...` | One page of rows, with the total | 200 `{ items, page, size, total }` |
+| `GET /api/{resource}/{id}` | One row | 200 |
+| `POST /api/{resource}` | Create | 201 with the new row and a `Location` header |
+| `PUT /api/{resource}/{id}` | Replace the editable fields (send them all) | 200 with the saved row |
+| `DELETE /api/{resource}/{id}` | Delete | 204 |
+
+`{resource}` is `accounts`, `contacts` or `deals`. Page is 0 based, size is 1 to 100.
+
+| Resource | Fields you send | Extra list filters | Rules worth knowing |
+|---|---|---|---|
+| `accounts` | `name` (required), `industry`, `country`, `website` | `search` (name) | `website` must be a full http or https address. Rows also show `contactCount`. Cannot be deleted while it has contacts (409 `ACCOUNT_HAS_CONTACTS`). |
+| `contacts` | `accountId`, `firstName`, `lastName`, `email` (all required), `phone`, `jobTitle`, `status` (`Prospect`, `Customer`, `Churned`) | `accountId`, `status`, `search` (name or email) | The account must exist (404 `ACCOUNT_NOT_FOUND`). Cannot be deleted while it has deals or logged activities (409 `CONTACT_HAS_HISTORY`). |
+| `deals` | `contactId`, `title`, `value` (0 or more, 2 decimals, GBP), `expectedCloseDate` (`yyyy-MM-dd`), `stage` (`Prospecting`, `Qualified`, `Proposal`, `Negotiation`, `Won`, `Lost`), `lostReason` | `stage`, `contactId`, `accountId`, `search` (title) | Rows show the contact and account names. The server sets `closedDate` (today) when a deal becomes Won or Lost and clears it when reopened; you never send it. `lostReason` is required for Lost and cleared otherwise. Lists are in close-date order. |
+
+Stages and statuses travel as upper-case names (`"stage": "WON"`, the same spelling the reports use), never as numbers. Names are accepted in any letter case, in bodies and in the `stage` and `status` list filters; a number or an unknown name is a 400. Errors are the same RFC 9457 problem documents as everywhere else: 400 with `errors` keyed by field name (`{"errors":{"Name":["..."]}}`), 404 and 409 with a `code`. A body that is not valid JSON, or a stage or status name that does not exist, is a 400 with code `BAD_REQUEST`.
+
+There is no API for logging activities yet; the seeded activities feed the "activities per user" report only.
+
 ## Screenshots
 
 What the frontend described in [docs/](docs) looks like when built against this API: nine screenshots of a reference
@@ -93,7 +117,7 @@ The files are `01-sign-in`, `02-sign-in-wrong-password`, `03-register-validation
 
 ## Tests
 
-`dotnet test nimbus_crm.slnx` runs everything that needs no database (52 tests). The 30 tests that run the report, login, lockout, revocation and credential checks against a real MySQL are skipped until you point them at a server whose account may create and drop databases:
+`dotnet test nimbus_crm.slnx` runs everything that needs no database (56 tests). The 44 tests that run the report, login, lockout, revocation, credential and accounts, contacts and deals checks against a real MySQL are skipped until you point them at a server whose account may create and drop databases:
 
 ```powershell
 $env:NIMBUS_TEST_MYSQL = "Server=127.0.0.1;Port=3306;User=root;Password=<password>"

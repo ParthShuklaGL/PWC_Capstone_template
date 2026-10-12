@@ -19,6 +19,12 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.FromLogContext());
 
 builder.Services.AddOpenApi();
+
+// Stages, statuses and activity types travel as upper-case names ("WON"), the same spelling the reports and
+// roles already use, never as numbers that shift if the enum is reordered. Numbers are refused on the way in.
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(
+        System.Text.Json.JsonNamingPolicy.SnakeCaseUpper, allowIntegerValues: false)));
 builder.Services.AddHealthChecks();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -113,5 +119,6 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Docs:En
 app.MapHealthChecks("/health");
 app.MapAuthEndpoints();
 app.MapReportEndpoints();
+app.MapCrmEndpoints();
 
 app.Run();

@@ -33,7 +33,7 @@ To start it, follow the README in the `nimbus_crm` folder. When it works, `http:
 ## What we do not give you
 
 - No frontend at all. That is your job.
-- No screens or API for contacts, deals or accounts yet. Do not build those; they are not part of this task.
+- The API also has accounts, contacts and deals (see the nimbus_crm README), but screens for them are not part of this task. Do not build those.
 
 ## What you build
 

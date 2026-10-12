@@ -29,7 +29,8 @@ Two boilerplates for a frontend capstone. Each gives the student a working backe
 - Reports (JSON and CSV): deals by stage, contacts per account, activities per user, users by role (ADMIN only).
 - Users list (ADMIN only, paged).
 - MySQL schema (User, Account, Contact, Deal, Activity) and 78 sample records in Development.
-- Not provided: CRUD endpoints for accounts, contacts and deals.
+- CRUD for accounts, contacts and deals: paged list with search and filters, get, create, update, delete (delete is ADMIN only). Deals carry the stage rules (close date set by the server, a lost deal needs a reason).
+- Not provided: an API for logging activities (they only feed a report).
 
 ### Java FSD
 
@@ -79,12 +80,13 @@ Folder: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/fsd-boi
 
 ## 5. Verification status
 
-- .NET CRM: 82 automated tests pass against a throwaway MySQL (11 unit, 71 integration). The reference frontend passed 37 unit tests and 37 real-browser checks against the live API.
+- .NET CRM: 100 automated tests pass against a throwaway MySQL (11 unit, 89 integration), and the accounts, contacts and deals API was exercised with real HTTP requests (statuses, bodies, roles, CSRF). The reference frontend passed 37 unit tests and 37 real-browser checks against the API before the CRUD was added; it has no screens for the CRUD yet.
 - Java FSD: backend compiles and 5 JWT tests pass. Its user stories F1 to F16 were checked in a browser (see its user-stories.md).
 - Not yet done: the .NET migration has not been applied to the author's own MySQL instance; everything above ran on throwaway databases.
 
 ## 6. Known gaps
 
-- .NET: no accounts, contacts or deals CRUD API, so the deal screens have no backend yet.
+- .NET: the CRUD API exists, but no frontend screens for it have been built or screenshotted yet (the published screenshots show sign-in, reports and users).
+- .NET: no API for logging activities.
 - .NET: deferred hardening items (xunit v3 migration, register user enumeration, session-id rotation, shared session store).
 - Java: default development secrets are public in the repository; replace them before any real use.

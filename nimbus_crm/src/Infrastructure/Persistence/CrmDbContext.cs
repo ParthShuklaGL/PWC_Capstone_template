@@ -18,8 +18,11 @@ public class CrmDbContext(DbContextOptions<CrmDbContext> options) : DbContext(op
 
     public DbSet<RevokedToken> RevokedTokens => Set<RevokedToken>();
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder) =>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
         configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateOnly>().HaveConversion<DateOnlyConverter>().HaveColumnType("date");
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CrmDbContext).Assembly);

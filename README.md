@@ -17,7 +17,7 @@ what every file is for, what has been verified, and where to start.
 
 | Folder or file | What it is | Status |
 |---|---|---|
-| [nimbus_crm](nimbus_crm) | **.NET 10 + MySQL 8 backend boilerplate.** Register, sign in and sign out (JWT, HttpOnly cookie or server session behind one rule), CSRF protection, USER and ADMIN roles, an admin user list, four reports with CSV export, an EF Core schema for users, accounts, contacts, deals and activities, development sample data, helper scripts and tests. | Built. 82 automated tests pass against a real MySQL; a scripted live proof ran against the running API. |
+| [nimbus_crm](nimbus_crm) | **.NET 10 + MySQL 8 backend boilerplate.** Register, sign in and sign out (JWT, HttpOnly cookie or server session behind one rule), CSRF protection, USER and ADMIN roles, an admin user list, four reports with CSV export, create/read/update/delete APIs for accounts, contacts and deals, an EF Core schema for users, accounts, contacts, deals and activities, development sample data, helper scripts and tests. | Built. 100 automated tests pass against a real MySQL; scripted live proofs ran against the running API. |
 | [nimbus_crm/docs](nimbus_crm/docs) | **The frontend brief for students**, in a detailed and a simple version. | Written. |
 | [fsd-boilerplate](fsd-boilerplate) | **React + Spring Boot + MySQL full-stack sample**: login (JWT, cookie, session), products CRUD, user administration, reports with CSV. | Run end to end on a throwaway MySQL (API with `curl`, UI in a real browser) with 10 screenshots. Automated tests: only 5 JWT unit tests. |
 | [plan.md](plan.md) | Step-by-step plan for finishing the projects. | Working document. |
@@ -67,6 +67,7 @@ Four projects in a clean layering. Dependencies only point inward: `Api` -> `App
 | [setup-dev.ps1](nimbus_crm/scripts/setup-dev.ps1) | One-time local setup. Creates the `nimbus_crm` database and the `crm_app` MySQL user, then stores the connection string and a random JWT signing key in `dotnet user-secrets`. You type the passwords; nothing is written to a file in the repo. |
 | [reset-mysql-root.ps1](nimbus_crm/scripts/reset-mysql-root.ps1) | Sets a new local MySQL root password when the old one is lost, using MySQL's documented `init-file` method. Needs Administrator rights. `-DryRun` shows what it found and changes nothing. |
 | [auth-proof.sh](nimbus_crm/scripts/auth-proof.sh) | Runs against a **running** API and prints every curl command with its response: register, each sign-in mode alone, all three together, CSRF refusals, sign-out and replay of old credentials, and USER / ADMIN / anonymous on an admin endpoint. |
+| [crud-proof.sh](nimbus_crm/scripts/crud-proof.sh) | Runs against a **running** API in Development: the accounts, contacts and deals API with real status codes and bodies (create, validation errors, 404 and 409, ADMIN-only delete, the deal close-date rules, filters, CSRF on cookie sign-in). It deletes what it creates. |
 
 ### 3.3 Domain ([src/Domain](nimbus_crm/src/Domain)): the data model, no dependencies
 
@@ -98,6 +99,8 @@ Commands and queries run through Mediator; every command is validated first by F
 | [Auth/AuthErrors.cs](nimbus_crm/src/Application/Auth/AuthErrors.cs) | The business errors: username taken, email taken, invalid credentials (one message for every sign-in failure). |
 | [Auth/UserDto.cs](nimbus_crm/src/Application/Auth/UserDto.cs) | What the API shows about a user. There is deliberately no password field. |
 | [Users/ListUsersQuery.cs](nimbus_crm/src/Application/Users/ListUsersQuery.cs) | The paged admin user list, with bounded page and size. |
+| [Crm/Accounts.cs](nimbus_crm/src/Application/Crm/Accounts.cs), [Contacts.cs](nimbus_crm/src/Application/Crm/Contacts.cs), [Deals.cs](nimbus_crm/src/Application/Crm/Deals.cs) | List (paged, searchable, filterable), get, create, update and delete for each, with their validators. Deals also own the stage rules: the server stamps the close date and clears it on reopening, and a lost deal needs a reason. |
+| [Crm/CrmErrors.cs](nimbus_crm/src/Application/Crm/CrmErrors.cs), [Paging.cs](nimbus_crm/src/Application/Crm/Paging.cs) | The not-found and "still has contacts or history" errors, and the paged-result shape with its page and size limits. |
 | [Reports/GetDealsByStageQuery.cs](nimbus_crm/src/Application/Reports/GetDealsByStageQuery.cs) | Count and total value per stage, one `GROUP BY` in MySQL; all six stages appear. |
 | [Reports/GetContactsPerAccountQuery.cs](nimbus_crm/src/Application/Reports/GetContactsPerAccountQuery.cs) | Contacts per account, biggest first; accounts with none show 0. |
 | [Reports/GetActivitiesPerUserQuery.cs](nimbus_crm/src/Application/Reports/GetActivitiesPerUserQuery.cs) | Activities logged per user, most active first. |
@@ -116,6 +119,7 @@ Commands and queries run through Mediator; every command is validated first by F
 | [Persistence/Configurations/](nimbus_crm/src/Infrastructure/Persistence/Configurations) | One configuration file per entity (`User`, `Account`, `Contact`, `Deal`, `Activity`, `RevokedToken`): maximum length on every string, indexes for search and paging, stage and role stored as text, money as `decimal(18,2)`. |
 | [Persistence/Migrations/](nimbus_crm/src/Infrastructure/Persistence/Migrations) | The generated `InitialCreate` migration and its model snapshot: the whole schema. |
 | [Persistence/UtcDateTimeConverter.cs](nimbus_crm/src/Infrastructure/Persistence/UtcDateTimeConverter.cs) | MySQL stores no time zone, so dates read back are marked UTC and serialize with a trailing `Z`. |
+| [Persistence/DateOnlyConverter.cs](nimbus_crm/src/Infrastructure/Persistence/DateOnlyConverter.cs) | The MySQL provider writes a `DateOnly` but cannot read it back; this converts through `DateTime` and keeps the column a plain `date`. |
 | [Persistence/DuplicateKey.cs](nimbus_crm/src/Infrastructure/Persistence/DuplicateKey.cs) | Recognises MySQL's "duplicate entry" error so the API answers 409 instead of 500. |
 | [Security/IdentityPasswordHasher.cs](nimbus_crm/src/Infrastructure/Security/IdentityPasswordHasher.cs) | Password hashing with ASP.NET Core Identity's PBKDF2-HMAC-SHA512 at 220,000 iterations. No custom crypto. |
 | [Security/DatabaseTokenRevocationList.cs](nimbus_crm/src/Infrastructure/Security/DatabaseTokenRevocationList.cs) | Signed-out credentials stored in the `RevokedTokens` table, so a restart does not revive them. |
@@ -132,6 +136,7 @@ Commands and queries run through Mediator; every command is validated first by F
 |---|---|
 | [Program.cs](nimbus_crm/src/Api/Program.cs) | Wires everything together: logging, error handling, authentication, rate limiting, sessions, anti-forgery, trusted proxies, HTTPS settings, security headers, and the endpoints. |
 | [Endpoints/AuthEndpoints.cs](nimbus_crm/src/Api/Endpoints/AuthEndpoints.cs) | `POST /api/auth/register`, `/login`, `/logout`; `GET /api/auth/me`, `/csrf`; `GET /api/users` (ADMIN). |
+| [Endpoints/CrmEndpoints.cs](nimbus_crm/src/Api/Endpoints/CrmEndpoints.cs) | `GET/POST /api/{accounts,contacts,deals}`, `GET/PUT/DELETE .../{id}`. Any signed-in caller may read and write; delete is ADMIN only. Stage and status filters are read in any letter case. |
 | [Endpoints/ReportEndpoints.cs](nimbus_crm/src/Api/Endpoints/ReportEndpoints.cs) | The four reports, each as JSON and as a downloadable CSV. |
 | [Endpoints/CsvWriter.cs](nimbus_crm/src/Api/Endpoints/CsvWriter.cs) | RFC 4180 CSV writer; quotes cells, writes numbers with a dot, and defuses text a spreadsheet would run as a formula. |
 | [Endpoints/NoStoreEndpointFilter.cs](nimbus_crm/src/Api/Endpoints/NoStoreEndpointFilter.cs) | Adds `Cache-Control: no-store` to responses that carry tokens or business data. |
@@ -146,7 +151,7 @@ Commands and queries run through Mediator; every command is validated first by F
 | [Auth/AppClaims.cs](nimbus_crm/src/Api/Auth/AppClaims.cs) | The same four claims (`sub`, `name`, `role`, `jti`) for all three modes, so one rule works for all. |
 | [Auth/AuthModeParser.cs](nimbus_crm/src/Api/Auth/AuthModeParser.cs) | Accepts the sign-in mode by name only (rejects numbers). |
 | [Auth/AuthOptions.cs](nimbus_crm/src/Api/Auth/AuthOptions.cs) | The settings classes for `Auth` and `Jwt`, and the check that refuses a weak signing key at startup. |
-| [ErrorHandling/GlobalExceptionHandler.cs](nimbus_crm/src/Api/ErrorHandling/GlobalExceptionHandler.cs) | Turns every exception into an RFC 9457 problem document: 400 for validation, 409 for duplicates, a generic 500 that leaks nothing. |
+| [ErrorHandling/GlobalExceptionHandler.cs](nimbus_crm/src/Api/ErrorHandling/GlobalExceptionHandler.cs) | Turns every exception into an RFC 9457 problem document: 400 for validation (field names without the internal wrapper) and for unreadable request bodies, 409 for duplicates, a generic 500 that leaks nothing. |
 | [appsettings.json](nimbus_crm/src/Api/appsettings.json) | Shared settings (no secrets): log levels, auth timings, lockout, HTTPS, allowed hosts, token issuer and audience. |
 | [appsettings.Development.json](nimbus_crm/src/Api/appsettings.Development.json) | Development-only settings, including the two published seed accounts and the seeding switch. |
 | [appsettings.Production.json](nimbus_crm/src/Api/appsettings.Production.json) | Makes logs one JSON object per line in Production. |
@@ -155,13 +160,14 @@ Commands and queries run through Mediator; every command is validated first by F
 
 ### 3.7 Tests ([nimbus_crm/tests](nimbus_crm/tests))
 
-82 tests: 11 unit, 71 integration. 30 of the integration tests need a real MySQL and are **skipped, not failed,**
+100 tests: 11 unit, 89 integration. 44 of the integration tests need a real MySQL and are **skipped, not failed,**
 unless `NIMBUS_TEST_MYSQL` is set (see the nimbus_crm README). Each of those creates its own throwaway database and drops it.
 
 | File | What it checks |
 |---|---|
 | [UnitTests/Behaviors/ValidationBehaviorTests.cs](nimbus_crm/tests/UnitTests/Behaviors/ValidationBehaviorTests.cs) | Valid input reaches the handler; invalid input throws one failure per field and never reaches it. |
 | [UnitTests/Security/IdentityPasswordHasherTests.cs](nimbus_crm/tests/UnitTests/Security/IdentityPasswordHasherTests.cs) | Hashes never contain the password, differ each time, verify correctly, record the work factor, and old weak hashes are flagged for replacement. |
+| [IntegrationTests/Crm/CrmCrudTests.cs](nimbus_crm/tests/IntegrationTests/Crm/CrmCrudTests.cs) | Accounts, contacts and deals against a real MySQL: round trips, validation, paging with totals, filters and sort order, the delete refusals, and the deal stage rules (close date stamped, kept on edit, cleared on reopening). |
 | [IntegrationTests/Auth/CredentialLifecycleTests.cs](nimbus_crm/tests/IntegrationTests/Auth/CredentialLifecycleTests.cs) | Signed-out credentials stay revoked after a "restart"; deactivated, demoted or unknown users are refused; the cleaner deletes only expired rows; duplicate usernames map to 409. |
 | [IntegrationTests/Auth/LoginLockoutTests.cs](nimbus_crm/tests/IntegrationTests/Auth/LoginLockoutTests.cs) | The real login handler: wrong-password counting, the fifth failure locks even the right password, the lock ends on time, a good sign-in resets the count, weak hashes are upgraded. |
 | [IntegrationTests/Auth/AuthLogicTests.cs](nimbus_crm/tests/IntegrationTests/Auth/AuthLogicTests.cs) | Sign-in mode parsing, signing-key quality rules, and paging bounds. |
@@ -226,11 +232,11 @@ production-ready. Start at its [README](fsd-boilerplate/README.md).
 | Area | State |
 |---|---|
 | `nimbus_crm` builds with no warnings | Verified. |
-| `nimbus_crm` tests | 82 pass: 11 unit and 71 integration, against a throwaway MySQL 8. |
+| `nimbus_crm` tests | 100 pass: 11 unit and 89 integration, against a throwaway MySQL 8. |
 | `nimbus_crm` live behaviour | Shown with real requests: each sign-in mode alone and together, sign-out and replay, CSRF, roles (401 / 403 / 200), lockout, restart-proof sign-out, deactivation and demotion, CSV output, key rotation, production-mode headers. |
 | `nimbus_crm` on a real developer database | **Not yet.** The proof used a throwaway database; the migration has not been applied to a machine's own MySQL. |
 | `nimbus_crm` frontend | **Not in this repository.** A reference implementation was built and tested locally (37 unit tests, and 34 checks in a real browser against the running API: three sign-in modes, reload, CSRF sign-out, replay refusal, role views, report numbers, all four CSV downloads, session-ended). Its screenshots are in section 9; its source is deliberately not published. |
-| `nimbus_crm` API for accounts, contacts, deals, activities | **Does not exist yet.** The tables, sample data and reports do. |
+| `nimbus_crm` API for accounts, contacts and deals | Built 2026-10-12 and shown with real requests on a throwaway MySQL: 401 anonymous, create 201 and `Location`, field-name validation errors, 404 and 409 with codes, ADMIN-only delete (403 for a USER), the deal close-date rules, case-insensitive stage filters, and CSRF on cookie sign-in. **No frontend screens exist for it yet**, and the activities have no API (they only feed a report). |
 | `fsd-boilerplate` | Verified on a throwaway MySQL on 2026-10-09: register and three sign-in modes (reload and sign-out too), products CRUD with search, paging and validation, user administration with its safeguards, roles (401 / 403 / 200), reports and CSV. Only 5 automated tests exist (JWT unit tests). A copied cookie or JWT keeps working after sign-out until it expires. |
 | Known limits of `nimbus_crm` | Sessions are held in memory (a restart ends session sign-ins, several instances do not share them); a deactivation or role change can take up to 30 seconds to reach a signed-in user; no multi-factor sign-in or password reset. The nimbus_crm README lists the rest. |
 

@@ -23,7 +23,7 @@ public sealed class GlobalExceptionHandler(
         if (exception is ValidationException validation)
         {
             var errors = validation.Errors
-                .GroupBy(failure => failure.PropertyName)
+                .GroupBy(failure => FieldName(failure.PropertyName))
                 .ToDictionary(
                     group => group.Key,
                     group => group.Select(failure => failure.ErrorMessage).Distinct().ToArray());
@@ -33,6 +33,19 @@ public sealed class GlobalExceptionHandler(
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "One or more validation errors occurred.",
+            };
+        }
+        else if (exception is BadHttpRequestException badRequest)
+        {
+            // Malformed JSON, a wrong type, or a name that is not in an enum (stage "Maybe"). The caller's mistake, not ours.
+            // The framework's message names internal types, so it stays out of the response.
+            httpContext.Response.StatusCode = badRequest.StatusCode;
+            problem = new ProblemDetails
+            {
+                Status = badRequest.StatusCode,
+                Title = "The request could not be read.",
+                Detail = "Check that the body is valid JSON and that every value, such as a stage or status name, is one the API accepts.",
+                Extensions = { ["code"] = "BAD_REQUEST" },
             };
         }
         else if (DuplicateKey.Matches(exception))
@@ -65,4 +78,11 @@ public sealed class GlobalExceptionHandler(
             ProblemDetails = problem,
         });
     }
+
+    /// <summary>
+    /// Create and update commands wrap their fields in an "Input" object, so FluentValidation reports
+    /// "Input.Name". Callers send and expect "Name", so the wrapper's name is dropped.
+    /// </summary>
+    internal static string FieldName(string propertyName) =>
+        propertyName.StartsWith("Input.", StringComparison.Ordinal) ? propertyName["Input.".Length..] : propertyName;
 }
