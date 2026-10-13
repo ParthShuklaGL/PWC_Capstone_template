@@ -1,0 +1,5 @@
+﻿
+> nimbus-crm-ui@0.1.0 screenshots
+> node e2e/screenshots.mjs
+
+Saved 9 screenshots to C:\Users\Parth Shukla\Downloads\CapstoneBoilerplate_react\reference-solution\screenshots\java

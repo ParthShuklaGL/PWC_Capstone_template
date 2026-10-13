@@ -2,5 +2,3 @@
 capstone1-crm-boilerplate/
 *.zip
 
-# The reference solution (a working frontend for nimbus_crm) is the answer to the student brief: kept local, only its screenshots are published
-reference-solution/

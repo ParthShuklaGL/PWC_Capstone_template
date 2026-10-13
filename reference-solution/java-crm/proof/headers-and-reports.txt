@@ -1,0 +1,118 @@
+# Reports, CSV, Cache-Control and error shapes against the JAVA backend (live, dev profile, seed data + auth-proof leftovers)
+# Run date: 2026-10-12 UTC. Tokens are never printed.
+
+### 1. deals-by-stage (JSON): expect counts 3,3,3,2,5,2 and values 46850.50, 94650.00, 99100.75, 147500.00, 137400.00, 27450.00
+[{"stage":"PROSPECTING","deals":3,"totalValue":46850.50},{"stage":"QUALIFIED","deals":3,"totalValue":94650.00},{"stage":"PROPOSAL","deals":3,"totalValue":99100.75},{"stage":"NEGOTIATION","deals":2,"totalValue":147500.00},{"stage":"WON","deals":5,"totalValue":137400.00},{"stage":"LOST","deals":2,"totalValue":27450.00}]
+
+### 2. contacts-per-account (JSON): Halcyon 4, Brightwater 3, Lumen 3, Northgate 3, Pinecrest 3, Cobalt 2, Meridian 2, Ashford 0
+[{"accountId":1,"account":"Halcyon Freight","contacts":4},{"accountId":2,"account":"Brightwater Foods","contacts":3},{"accountId":5,"account":"Lumen Analytics","contacts":3},{"accountId":3,"account":"Northgate Logistics","contacts":3},{"accountId":4,"account":"Pinecrest Health","contacts":3},{"accountId":6,"account":"Cobalt Engineering","contacts":2},{"accountId":7,"account":"Meridian Retail","contacts":2},{"accountId":8,"account":"Ashford Legal","contacts":0}]
+
+### 3. activities-per-user (JSON): admin 20, demo 10 (plus any user the auth proof registered, with 0)
+[{"userId":1,"username":"admin","activities":20},{"userId":2,"username":"demo","activities":10},{"userId":3,"username":"proof_1791803421","activities":0}]
+
+### 4. users-by-role (JSON, ADMIN)
+[{"role":"USER","users":2},{"role":"ADMIN","users":1}]
+
+### 5. users-by-role as USER -> 403 with no body, anonymous -> 401
+USER json: 403
+USER csv:  403
+anonymous: 401
+
+### 6. CSV: headers and exact bytes (CRLF shown as \r\n by od)
+HTTP/1.1 200 
+Cache-Control: no-store
+Content-Disposition: attachment; filename=deals-by-stage-2026-10-12.csv
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: text/csv;charset=utf-8
+Content-Length: 153
+Date: Mon, 12 Oct 2026 11:10:43 GMT
+
+--- body:
+Stage,Deals,TotalValueGbp
+PROSPECTING,3,46850.50
+QUALIFIED,3,94650.00
+PROPOSAL,3,99100.75
+NEGOTIATION,2,147500.00
+WON,5,137400.00
+LOST,2,27450.00
+--- first bytes (no BOM):
+0000000   S   t   a   g   e   ,   D   e   a   l   s   ,   T   o   t   a
+0000020
+--- CRLF line count: 7 of 7 lines
+
+### 7. the other CSV files
+# contacts-per-account.csv
+HTTP/1.1 200 
+Cache-Control: no-store
+Content-Disposition: attachment; filename=contacts-per-account-2026-10-12.csv
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: text/csv;charset=utf-8
+Content-Length: 204
+Date: Mon, 12 Oct 2026 11:10:43 GMT
+AccountId,Account,Contacts
+1,Halcyon Freight,4
+2,Brightwater Foods,3
+5,Lumen Analytics,3
+3,Northgate Logistics,3
+4,Pinecrest Health,3
+6,Cobalt Engineering,2
+7,Meridian Retail,2
+8,Ashford Legal,0
+
+# activities-per-user.csv
+HTTP/1.1 200 
+Cache-Control: no-store
+Content-Disposition: attachment; filename=activities-per-user-2026-10-12.csv
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: text/csv;charset=utf-8
+Content-Length: 73
+Date: Mon, 12 Oct 2026 11:10:44 GMT
+UserId,Username,Activities
+1,admin,20
+2,demo,10
+3,proof_1791803421,0
+
+# users-by-role.csv
+HTTP/1.1 200 
+Cache-Control: no-store
+Content-Disposition: attachment; filename=users-by-role-2026-10-12.csv
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: text/csv;charset=utf-8
+Content-Length: 29
+Date: Mon, 12 Oct 2026 11:10:44 GMT
+Role,Users
+USER,2
+ADMIN,1
+
+### 8. Cache-Control: no-store on authenticated JSON, errors and logins
+/api/accounts -> Cache-Control: no-store
+/api/auth/me -> Cache-Control: no-store
+/api/reports/deals-by-stage -> Cache-Control: no-store
+anonymous 401 -> Cache-Control: no-store
+login -> Cache-Control: no-store
+
+### 9. Error shapes: unreadable JSON, unknown route, wrong method, validation (PascalCase keys), 404 code
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"The request could not be read.","status":400,"detail":"Check that the body is valid JSON and that every value, such as a stage or status name, is one the API accepts.","code":"BAD_REQUEST","traceId":"00-525fd387082479418bf7a02d0843520f-f2ffb10673159a52-00"}
+unknown route: 404
+PATCH /api/accounts: 405
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"ContactId":["'Contact Id' must be greater than '0'."],"Title":["'Title' must not be empty."],"Value":["'Value' must be between 0 and 1000000000000. You entered -1."],"LostReason":["Say why the deal was lost."]},"traceId":"00-948c491dfdc1611b826d61a4b8847b51-dd3d5589a29fcd1e-00"}
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"detail":"That deal does not exist.","code":"DEAL_NOT_FOUND","traceId":"00-098da9410ff848e53df6dc45ca7c664b-f8d9959f6157d0c1-00"}
+
+### 10. /health and OpenAPI document (dev profile)
+Healthy <- 200
+openapi /openapi/v1.json: 200
+20 paths in the Java document; 20 in the .NET document
+only in Java: []
+only in .NET: []

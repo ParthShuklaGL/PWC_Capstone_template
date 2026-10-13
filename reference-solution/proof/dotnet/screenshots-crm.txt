@@ -1,0 +1,5 @@
+﻿
+> nimbus-crm-ui@0.1.0 screenshots:crm
+> node e2e/crm-screenshots.mjs
+
+Saved 8 screenshots to C:\Users\Parth Shukla\Downloads\CapstoneBoilerplate_react\reference-solution\screenshots\dotnet: 01-accounts-list, 02-new-account-field-errors, 06-blocked-delete-message, 03-contacts-filtered, 04-deals-pipeline, 05-deal-edit-lost-reason, 07-user-no-delete-buttons, 08-deals-phone-dark

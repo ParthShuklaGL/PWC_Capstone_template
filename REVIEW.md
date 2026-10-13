@@ -41,7 +41,7 @@ Two boilerplates for a frontend capstone. Each gives the student a working backe
 
 ## 3. Reference UI screenshots
 
-These show what a finished frontend looks like. Reference source code is not published.
+These show what a finished frontend looks like. The reference solution source is in [reference-solution](https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution) (mentors only: it is the answer to the student assignment).
 
 ### .NET CRM
 
@@ -75,6 +75,15 @@ Folder: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/fsd-boi
 8. [Reports, ADMIN](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/fsd-boilerplate/docs/screenshots/08-reports-admin.png)
 9. [Products, USER (limited)](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/fsd-boilerplate/docs/screenshots/09-products-user-limited.png)
 10. [Phone, dark mode](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/fsd-boilerplate/docs/screenshots/10-reports-phone-dark.png)
+
+### Full CRM screens (accounts, contacts, deals), same app on both backends
+
+Taken on 2026-10-13 from the reference solution, with the seeded sample data. The same frontend ran unchanged against each backend.
+
+- .NET backend: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/screenshots/dotnet
+- Java backend: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/screenshots/java
+- Check logs (37 and 71 browser checks per backend, 82 unit tests): https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/proof
+- Backend comparison: https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/COMPARISON.md
 
 ## 4. How to review
 

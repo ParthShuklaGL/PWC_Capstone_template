@@ -1,0 +1,181 @@
+# mvn test output (Maven 3.9.9, JDK 21, Spring Boot 3.3.5) against a throwaway MySQL 8.0.46 on port 3398, 2026-10-12 UTC.
+# Spring/Hibernate start-up log lines are omitted; the test summary lines and the full list of test cases are complete.
+# Paths and secrets are removed.
+
+================ 1. With CRM_TEST_MYSQL_URL set: every test runs ================
+[INFO] Running com.example.crm.AuthTests
+[INFO] Tests run: 38, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.94 s -- in com.example.crm.AuthTests
+[INFO] Running com.example.crm.CrmCrudTests
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.770 s -- in com.example.crm.CrmCrudTests
+[INFO] Running com.example.crm.ReportTests
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.625 s -- in com.example.crm.ReportTests
+[INFO] Running com.example.crm.UnitTests
+[INFO] Tests run: 51, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.108 s -- in com.example.crm.UnitTests
+[INFO] Running com.example.crm.web.ErrorHandlerTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.example.crm.web.ErrorHandlerTests
+[INFO] Results:
+[INFO] Tests run: 142, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Total time:  25.326 s
+
+---------------- every test case (from target/surefire-reports) ----------------
+  PASSED  AuthTests.meReportsTheCredentialThatWasUsed [1674 ms]
+  PASSED  AuthTests.jwtLoginReturnsTheDocumentedShape [72 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[1] [100 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[2] [58 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[3] [38 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[4] [52 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[5] [53 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[6] [52 ms]
+  PASSED  AuthTests.anUnknownOrNumericModeIsRefused(String)[7] [55 ms]
+  PASSED  AuthTests.aBearerHeaderWinsOverCookiesAndAnInvalidOneIsNotRescued [91 ms]
+  PASSED  AuthTests.theModeDefaultsToJwtAndIsCaseInsensitive [69 ms]
+  PASSED  AuthTests.everyLoginFailureGivesTheSameAnswer [120 ms]
+  PASSED  AuthTests.aRoleRefusalComesBeforeTheCsrfCheck [61 ms]
+  PASSED  AuthTests.aTokenBelongsToTheUserAndTheCookieItWasIssuedFor [134 ms]
+  PASSED  AuthTests.aDeactivatedUserIsRefusedOnTheNextRequestInEveryMode [105 ms]
+  PASSED  AuthTests.healthAnswersHealthyAndUnknownRoutesAre404 [68 ms]
+  PASSED  AuthTests.failuresAgainstOneAccountDoNotLockAnother [143 ms]
+  PASSED  AuthTests.passwordsAreHashedWithASaltSoEqualPasswordsGiveDifferentHashes [85 ms]
+  PASSED  AuthTests.sessionLogoutDestroysTheServerSideSession [101 ms]
+  PASSED  AuthTests.aGoodLoginResetsTheFailureCount [243 ms]
+  PASSED  AuthTests.registerValidationUsesPascalCaseKeys [89 ms]
+  PASSED  AuthTests.forgedAndMisdirectedTokensAreRefused [82 ms]
+  PASSED  AuthTests.logoutNeedsASignedInCaller [32 ms]
+  PASSED  AuthTests.aDeletedUsersCredentialIsRefused [68 ms]
+  PASSED  AuthTests.csrfEndpointReturnsTheHeaderNameAndATokenAndSetsItsCookie [51 ms]
+  PASSED  AuthTests.cookieAndSessionChangesNeedTheTokenButReadsAndBearerDoNot [248 ms]
+  PASSED  AuthTests.loginValidationNamesTheFields [56 ms]
+  PASSED  AuthTests.aChangedRoleEndsOldCredentials [92 ms]
+  PASSED  AuthTests.theUserListIsAdminOnlyInEveryMode [105 ms]
+  PASSED  AuthTests.theUserListIsAdminOnlyAndPaged [176 ms]
+  PASSED  AuthTests.theSessionIdIsStableAcrossRequests [63 ms]
+  PASSED  AuthTests.cookieLogoutNeedsTheCsrfTokenAndRevokesTheOldCookie [109 ms]
+  PASSED  AuthTests.registerRefusesDuplicatesWithDistinctCodes [66 ms]
+  PASSED  AuthTests.jwtLifetimeIsFifteenMinutesAndCookieLifetimeSixty [74 ms]
+  PASSED  AuthTests.fiveWrongPasswordsLockTheAccountEvenForTheRightPassword [109 ms]
+  PASSED  AuthTests.registerCreatesAPlainUserAndNeverReturnsAHash [48 ms]
+  PASSED  AuthTests.signingOutOfOneModeLeavesTheOthersWorking [132 ms]
+  PASSED  AuthTests.loggingOutAJwtRevokesIt [60 ms]
+  PASSED  CrmCrudTests.anAccountListShowsContactCountsAndSortsByName [184 ms]
+  PASSED  CrmCrudTests.responsesAreNeverCachedAndCarryTheHardeningHeaders [48 ms]
+  PASSED  CrmCrudTests.dealValidationKeys [192 ms]
+  PASSED  CrmCrudTests.searchTreatsPercentAndUnderscoreAsPlainText [59 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[1] [37 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[2] [46 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[3] [36 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[4] [45 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[5] [33 ms]
+  PASSED  CrmCrudTests.aWebsiteMustBeAFullHttpOrHttpsAddress(String)[6] [38 ms]
+  PASSED  CrmCrudTests.deleteRefusalsAndAdminOnlyRule [230 ms]
+  PASSED  CrmCrudTests.accountValidationReportsPascalCaseKeys [28 ms]
+  PASSED  CrmCrudTests.anIdTooLargeForALongIsNotFoundWithNoStackTrace [64 ms]
+  PASSED  CrmCrudTests.anAccountCanBeCreatedReadUpdatedListedAndDeleted [102 ms]
+  PASSED  CrmCrudTests.accountMaximumLengthsAreEnforced [35 ms]
+  PASSED  CrmCrudTests.unreadableBodiesAndUnknownOrNumericEnumsAreBadRequests [82 ms]
+  PASSED  CrmCrudTests.aContactCanBeCreatedWithItsAccountNameAndUpdated [75 ms]
+  PASSED  CrmCrudTests.contactListFiltersByStatusInAnyCaseAndByAccount [126 ms]
+  PASSED  CrmCrudTests.pagingEdgesAreAccepted [66 ms]
+  PASSED  CrmCrudTests.aJsonStringIsNotAcceptedForANumberAndPropertyNamesIgnoreCase [50 ms]
+  PASSED  CrmCrudTests.closedDateIsSetByTheServerInUtcKeptOnEditsAndClearedOnReopen [165 ms]
+  PASSED  CrmCrudTests.anUnknownOrNonNumericIdIsNotFound [66 ms]
+  PASSED  CrmCrudTests.aContactWithOnlyAnActivityCannotBeDeleted [91 ms]
+  PASSED  CrmCrudTests.aDealIsCreatedWithItsContactAndAccountNames [91 ms]
+  PASSED  CrmCrudTests.pagingOutsideTheLimitsIsRefusedOnEveryList(int, int, String)[1] [71 ms]
+  PASSED  CrmCrudTests.pagingOutsideTheLimitsIsRefusedOnEveryList(int, int, String)[2] [60 ms]
+  PASSED  CrmCrudTests.pagingOutsideTheLimitsIsRefusedOnEveryList(int, int, String)[3] [67 ms]
+  PASSED  CrmCrudTests.pagingOutsideTheLimitsIsRefusedOnEveryList(int, int, String)[4] [67 ms]
+  PASSED  CrmCrudTests.pagingOutsideTheLimitsIsRefusedOnEveryList(int, int, String)[5] [60 ms]
+  PASSED  CrmCrudTests.dealListFiltersAndSortOrder [167 ms]
+  PASSED  CrmCrudTests.contactValidationAndMissingParents [70 ms]
+  PASSED  CrmCrudTests.everyCrmRouteNeedsASignedInCaller [43 ms]
+  PASSED  CrmCrudTests.lostNeedsAReasonAndOtherStagesClearIt [111 ms]
+  PASSED  ReportTests.usersByRoleIsAdminOnlyButTheOtherReportsAreOpenToAnyUser [368 ms]
+  PASSED  ReportTests.contactsPerAccountCountsZeroAccountsAndSortsBiggestFirst [237 ms]
+  PASSED  ReportTests.dealsByStageCsvIsRfc4180WithCrlfAndTwoDecimals [230 ms]
+  PASSED  ReportTests.activitiesPerUserCountsEveryUserMostActiveFirst [219 ms]
+  PASSED  ReportTests.everyReportNeedsASignedInCaller [241 ms]
+  PASSED  ReportTests.activitiesPerUserCsvHasItsColumns [219 ms]
+  PASSED  ReportTests.aggregatesAreComputedByMySqlNotInMemory [240 ms]
+  PASSED  ReportTests.theFileNameDateIsTheUtcDate [213 ms]
+  PASSED  ReportTests.anEmptyDatabaseStillShowsEverySlot [214 ms]
+  PASSED  ReportTests.usersByRoleShowsBothRolesUpperCase [233 ms]
+  PASSED  ReportTests.dealsByStageListsAllSixStagesInPipelineOrderWithGbpTotals [207 ms]
+  PASSED  ReportTests.csvResponsesCarryTheDownloadHeaders [224 ms]
+  PASSED  ReportTests.theSampleDataProducesTheDocumentedReportNumbers [352 ms]
+  PASSED  ReportTests.csvTextIsUtf8WithoutABomAndDefusesFormulas [231 ms]
+  PASSED  ReportTests.usersByRoleCsv [178 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[1] [18 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[2] [0 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[3] [0 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[4] [0 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[5] [0 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[6] [0 ms]
+  PASSED  UnitTests.otherAddressesFail(String)[7] [0 ms]
+  PASSED  UnitTests.csvHasHeadersThenOneCrlfLinePerRow [0 ms]
+  PASSED  UnitTests.authModeAcceptsTheThreeNamesInAnyCase(String, AuthMode)[1] [0 ms]
+  PASSED  UnitTests.authModeAcceptsTheThreeNamesInAnyCase(String, AuthMode)[2] [0 ms]
+  PASSED  UnitTests.authModeAcceptsTheThreeNamesInAnyCase(String, AuthMode)[3] [0 ms]
+  PASSED  UnitTests.authModeAcceptsTheThreeNamesInAnyCase(String, AuthMode)[4] [0 ms]
+  PASSED  UnitTests.aHashMadeWithALowerWorkFactorIsFlaggedForRehash [7 ms]
+  PASSED  UnitTests.aNegativeNumberStaysANumberAndIsNotDefused [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[1] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[2] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[3] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[4] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[5] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[6] [7 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[7] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[8] [0 ms]
+  PASSED  UnitTests.authModeRefusesNumbersListsAndUnknownNames(String)[9] [0 ms]
+  PASSED  UnitTests.anUnknownDefaultModeStopsStartup [5 ms]
+  PASSED  UnitTests.moneyUsesADotAndTwoDecimalsWhateverTheLocale [0 ms]
+  PASSED  UnitTests.cellsAreQuotedAndFormulaDefused [0 ms]
+  PASSED  UnitTests.everyRuleRunsSoACallerSeesAllProblemsAndKeysArePascalCase [4 ms]
+  PASSED  UnitTests.aShortOrRepetitiveSigningKeyStopsStartup(String)[1] [0 ms]
+  PASSED  UnitTests.aShortOrRepetitiveSigningKeyStopsStartup(String)[2] [0 ms]
+  PASSED  UnitTests.aShortOrRepetitiveSigningKeyStopsStartup(String)[3] [0 ms]
+  PASSED  UnitTests.aShortOrRepetitiveSigningKeyStopsStartup(String)[4] [0 ms]
+  PASSED  UnitTests.aShortOrRepetitiveSigningKeyStopsStartup(String)[5] [0 ms]
+  PASSED  UnitTests.controlCharactersAndLineBreaksAreHandled [0 ms]
+  PASSED  UnitTests.moneyMustFitTwoDecimalsAndTheRange [0 ms]
+  PASSED  UnitTests.aMissingKeyStopsStartupAndARandomOneIsAccepted [4 ms]
+  PASSED  UnitTests.sensibleEmailsPass(String)[1] [0 ms]
+  PASSED  UnitTests.sensibleEmailsPass(String)[2] [0 ms]
+  PASSED  UnitTests.sensibleEmailsPass(String)[3] [0 ms]
+  PASSED  UnitTests.aNullWebsiteIsAllowed [0 ms]
+  PASSED  UnitTests.badEmailsFail(String)[1] [0 ms]
+  PASSED  UnitTests.badEmailsFail(String)[2] [0 ms]
+  PASSED  UnitTests.badEmailsFail(String)[3] [0 ms]
+  PASSED  UnitTests.badEmailsFail(String)[4] [0 ms]
+  PASSED  UnitTests.badEmailsFail(String)[5] [0 ms]
+  PASSED  UnitTests.loginAndRegisterAreLimitedPerClientPerMinute [15 ms]
+  PASSED  UnitTests.blankOptionalTextBecomesNull [0 ms]
+  PASSED  UnitTests.httpAndHttpsAddressesPass(String)[1] [0 ms]
+  PASSED  UnitTests.httpAndHttpsAddressesPass(String)[2] [0 ms]
+  PASSED  UnitTests.httpAndHttpsAddressesPass(String)[3] [0 ms]
+  PASSED  UnitTests.anOverlongPasswordIsNeverSilentlyTruncated [4 ms]
+  PASSED  UnitTests.passwordsAreHashedAndVerified [6 ms]
+  PASSED  ErrorHandlerTests.anUnexpectedFailureIsAGenericFiveHundredThatLeaksNothing [3 ms]
+  PASSED  ErrorHandlerTests.anUnreadableBodyIsBadRequestWithoutFrameworkText [0 ms]
+  PASSED  ErrorHandlerTests.aDuplicateKeyRaceIsAConflictAndAnyOtherIntegrityFailureIsAGenericFiveHundred [7 ms]
+  PASSED  ErrorHandlerTests.businessFailuresCarryACodeAndADetail [0 ms]
+  PASSED  ErrorHandlerTests.validationFailuresListFieldKeysInOrder [0 ms]
+
+total: 142 passed: 142 failed: 0 skipped: 0
+
+================ 2. Without CRM_TEST_MYSQL_URL: the 71 database tests are SKIPPED, not failed ================
+[INFO] Running com.example.crm.AuthTests
+[WARNING] Tests run: 32, Failures: 0, Errors: 0, Skipped: 32, Time elapsed: 0.015 s -- in com.example.crm.AuthTests
+[INFO] Running com.example.crm.CrmCrudTests
+[WARNING] Tests run: 24, Failures: 0, Errors: 0, Skipped: 24, Time elapsed: 0 s -- in com.example.crm.CrmCrudTests
+[INFO] Running com.example.crm.ReportTests
+[WARNING] Tests run: 15, Failures: 0, Errors: 0, Skipped: 15, Time elapsed: 0.001 s -- in com.example.crm.ReportTests
+[INFO] Running com.example.crm.UnitTests
+[INFO] Tests run: 51, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.613 s -- in com.example.crm.UnitTests
+[INFO] Running com.example.crm.web.ErrorHandlerTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in com.example.crm.web.ErrorHandlerTests
+[INFO] Results:
+[WARNING] Tests run: 127, Failures: 0, Errors: 0, Skipped: 71
+[INFO] BUILD SUCCESS
+[INFO] Total time:  8.495 s

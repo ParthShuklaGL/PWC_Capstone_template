@@ -22,7 +22,7 @@ what every file is for, what has been verified, and where to start.
 | [fsd-boilerplate](fsd-boilerplate) | **React + Spring Boot + MySQL full-stack sample**: login (JWT, cookie, session), products CRUD, user administration, reports with CSV. | Run end to end on a throwaway MySQL (API with `curl`, UI in a real browser) with 10 screenshots. Automated tests: only 5 JWT unit tests. |
 | [plan.md](plan.md) | Step-by-step plan for finishing the projects. | Working document. |
 
-What this repository is **not**: it holds no frontend source for `nimbus_crm` (students build it from the brief; section 9 shows screenshots of a reference implementation that is deliberately not published), and `nimbus_crm` has no API yet for
+What this repository is **not**: its student brief expects students to build their own frontend; a complete reference solution (frontend and a Java twin backend) is in [reference-solution](reference-solution) and is **for mentors: it is the answer to the assignment, so do not hand it to students**, and `nimbus_crm` has no API yet for
 creating or editing accounts, contacts, deals or activities (their tables exist and the reports read them).
 The original capstone starter and its mentor material are not published here.
 
@@ -238,7 +238,7 @@ production-ready. Start at its [README](fsd-boilerplate/README.md).
 | `nimbus_crm` tests | 100 pass: 11 unit and 89 integration, against a throwaway MySQL 8. |
 | `nimbus_crm` live behaviour | Shown with real requests: each sign-in mode alone and together, sign-out and replay, CSRF, roles (401 / 403 / 200), lockout, restart-proof sign-out, deactivation and demotion, CSV output, key rotation, production-mode headers. |
 | `nimbus_crm` on a real developer database | **Not yet.** The proof used a throwaway database; the migration has not been applied to a machine's own MySQL. |
-| `nimbus_crm` frontend | **Not in this repository.** A reference implementation was built and tested locally (37 unit tests, and 34 checks in a real browser against the running API: three sign-in modes, reload, CSRF sign-out, replay refusal, role views, report numbers, all four CSV downloads, session-ended). Its screenshots are in section 9; its source is deliberately not published. |
+| `nimbus_crm` frontend | **Reference solution in [reference-solution/frontend](reference-solution/frontend) (mentors only, not for students).** Built and tested locally (37 unit tests, and 34 checks in a real browser against the running API: three sign-in modes, reload, CSRF sign-out, replay refusal, role views, report numbers, all four CSV downloads, session-ended). Its screenshots are in section 9; its source is in that folder. |
 | `nimbus_crm` API for accounts, contacts and deals | Built 2026-10-12 and shown with real requests on a throwaway MySQL: 401 anonymous, create 201 and `Location`, field-name validation errors, 404 and 409 with codes, ADMIN-only delete (403 for a USER), the deal close-date rules, case-insensitive stage filters, and CSRF on cookie sign-in. **No frontend screens exist for it yet**, and the activities have no API (they only feed a report). |
 | `fsd-boilerplate` | Verified on a throwaway MySQL on 2026-10-09: register and three sign-in modes (reload and sign-out too), products CRUD with search, paging and validation, user administration with its safeguards, roles (401 / 403 / 200), reports and CSV. Only 5 automated tests exist (JWT unit tests). A copied cookie or JWT keeps working after sign-out until it expires. |
 | Known limits of `nimbus_crm` | Sessions are held in memory (a restart ends session sign-ins, several instances do not share them); a deactivation or role change can take up to 30 seconds to reach a signed-in user; no multi-factor sign-in or password reset. The nimbus_crm README lists the rest. |
@@ -260,7 +260,7 @@ production-ready. Start at its [README](fsd-boilerplate/README.md).
 
 These nine screenshots are of a **reference frontend running against the real `nimbus_crm` API** (React, TypeScript, Vite),
 built to the student brief. They show what a finished solution looks like, so students can see the target. The source is
-**not published**, because it is the answer to the assignment; the layout and styling are suggestions and students may design
+**mentors only**, because it is the answer to the assignment; the layout and styling are suggestions and students may design
 their own. The files are in [nimbus_crm/docs/screenshots](nimbus_crm/docs/screenshots).
 
 | Sign in (three methods) | Wrong password: the same generic message the server gives |

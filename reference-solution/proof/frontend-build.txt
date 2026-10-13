@@ -1,0 +1,14 @@
+﻿
+> nimbus-crm-ui@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 60 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.39 kB │ gzip:  0.26 kB
+dist/assets/index-Dr4vmyOo.css    8.18 kB │ gzip:  2.39 kB
+dist/assets/index-BLCnyAl5.js   302.34 kB │ gzip: 92.93 kB
+
+✓ built in 390ms

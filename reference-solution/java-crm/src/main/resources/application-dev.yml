@@ -1,0 +1,18 @@
+# Development profile: seeds the two published development accounts and the sample data on empty tables.
+# These passwords are public on purpose (they are in the .NET backend's README too) and exist only in this profile.
+app:
+  seed:
+    enabled: true
+    admin:
+      username: admin
+      email: admin@nimbuscrm.dev
+      password: Admin#Dev-2026!
+    user:
+      username: demo
+      email: demo@nimbuscrm.dev
+      password: User#Dev-2026!
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /openapi/v1.json

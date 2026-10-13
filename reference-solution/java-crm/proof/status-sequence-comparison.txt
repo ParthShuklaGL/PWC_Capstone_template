@@ -1,0 +1,9 @@
+Status-code sequence of nimbus_crm/scripts/crud-proof.sh (32 requests)
+
+.NET  (nimbus_crm/docs/proof/crud-proof-output.txt):
+401 200 201 400 404 201 201 400 200 200 400 400 400 201 200 204 200 200 403 409 409 204 204 204 404 403 201 200 200 400 400 200 
+
+JAVA  (proof/crud-proof-output.txt):
+401 200 201 400 404 201 201 400 200 200 400 400 400 201 200 204 200 200 403 409 409 204 204 204 404 403 201 200 200 400 400 200 
+
+RESULT: IDENTICAL

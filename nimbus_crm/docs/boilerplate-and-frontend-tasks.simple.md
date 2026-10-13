@@ -76,7 +76,7 @@ Make a `frontend/` folder (React + TypeScript + Vite). Build these five things:
 
 ## Reference screenshots
 
-Screens of a **reference frontend built against this backend**, so you can see the target. Its source is not published, and your
+Screens of a **reference frontend built against this backend**, so you can see the target. Its source is kept for mentors, and your
 design can be completely different: these are a suggestion, not a requirement.
 
 | Sign in | Users list (ADMIN) | Reports with CSV download |

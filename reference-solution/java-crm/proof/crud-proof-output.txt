@@ -1,0 +1,101 @@
+# Live proof of accounts / contacts / deals against the JAVA (Spring Boot + MySQL 8.0) backend
+# Produced by nimbus_crm/scripts/crud-proof.sh with BASE_URL=http://localhost:5091 (dev profile, fresh MySQL, sample data seeded).
+# Run date: 2026-10-12 (UTC). Tokens are never printed.
+
+tokens: admin=301 chars, demo=299 chars (values not printed)
+
+### 1. Anonymous is refused
+GET /api/accounts -> 401
+
+
+### 2. List accounts (signed in, first page of 2) - sample data from the seeder
+GET /api/accounts?size=2 -> 200
+{"items":[{"id":8,"name":"Ashford Legal","industry":"Legal Services","country":"United Kingdom","website":null,"createdAt":"2026-07-14T11:09:56.862585Z","contactCount":0},{"id":2,"name":"Brightwater Foods","industry":"Food and Beverage","country":"Ireland","website":null,"createdAt":"2026-07-14T11:09:56.862585Z","contactCount":3}],"page":0,"size":2,"total":8}
+
+### 3. Create an account
+POST /api/accounts -> 201
+{"id":9,"name":"Proof Co","industry":"Testing","country":null,"website":"https://proof.example","createdAt":"2026-10-12T11:10:11.807248Z","contactCount":0}
+
+### 4. Invalid account: blank name and a bad website -> field errors
+POST /api/accounts -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Name":["'Name' must not be empty."],"Website":["Website must be a full http or https address."]},"traceId":"00-940d98c9bc35fed72cc13d45a3a77226-fffb16ee420767f8-00"}
+
+### 5. Contact for an account that does not exist -> 404
+POST /api/contacts -> 404
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"detail":"That account does not exist.","code":"ACCOUNT_NOT_FOUND","traceId":"00-edf8e84009592dd81d53720c9df711e4-b7401326ba55d12d-00"}
+
+### 6. Create a contact, then a deal
+POST /api/contacts -> 201
+{"id":21,"accountId":9,"accountName":"Proof Co","firstName":"Mia","lastName":"Park","email":"mia@example.com","phone":null,"jobTitle":"CTO","status":"CUSTOMER","lastContactedAt":null,"createdAt":"2026-10-12T11:10:12.873197Z"}
+POST /api/deals -> 201
+{"id":19,"contactId":21,"contactName":"Mia Park","accountId":9,"accountName":"Proof Co","title":"Proof renewal","value":1234.56,"expectedCloseDate":"2026-12-01","stage":"NEGOTIATION","closedDate":null,"lostReason":null,"createdAt":"2026-10-12T11:10:13.511299Z","updatedAt":"2026-10-12T11:10:13.511299Z"}
+
+### 7. Mark the deal Lost without a reason -> 400; with a reason -> closedDate stamped
+PUT /api/deals/19 -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"LostReason":["Say why the deal was lost."]},"traceId":"00-8994e999525e5ea13fcdfaf5b5b106f9-00ce87b2730629a7-00"}
+PUT /api/deals/19 -> 200
+{"id":19,"contactId":21,"contactName":"Mia Park","accountId":9,"accountName":"Proof Co","title":"Proof renewal","value":1234.56,"expectedCloseDate":"2026-12-01","stage":"LOST","closedDate":"2026-10-12","lostReason":"Budget cut","createdAt":"2026-10-12T11:10:13.511299Z","updatedAt":"2026-10-12T11:10:14.276198Z"}
+
+### 8. Reopen it -> closedDate and lostReason cleared
+PUT /api/deals/19 -> 200
+{"id":19,"contactId":21,"contactName":"Mia Park","accountId":9,"accountName":"Proof Co","title":"Proof renewal","value":1234.56,"expectedCloseDate":"2026-12-01","stage":"NEGOTIATION","closedDate":null,"lostReason":null,"createdAt":"2026-10-12T11:10:13.511299Z","updatedAt":"2026-10-12T11:10:14.575719Z"}
+
+### 9. Unknown stage name -> 400
+POST /api/deals -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"The request could not be read.","status":400,"detail":"Check that the body is valid JSON and that every value, such as a stage or status name, is one the API accepts.","code":"BAD_REQUEST","traceId":"00-121fde98702722d4196a4251385febb5-b57d9967190068a0-00"}
+POST /api/deals -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"The request could not be read.","status":400,"detail":"Check that the body is valid JSON and that every value, such as a stage or status name, is one the API accepts.","code":"BAD_REQUEST","traceId":"00-50a5d5c6b5b5d5d230cb8130cceca3bb-f294983936c43e93-00"}
+
+### 9b. Stage as a number is refused; any letter case is accepted; filter is case-insensitive
+POST /api/deals -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"The request could not be read.","status":400,"detail":"Check that the body is valid JSON and that every value, such as a stage or status name, is one the API accepts.","code":"BAD_REQUEST","traceId":"00-7a5f0721e4477f27d8575c3d2fe9b28a-651d9c1af68beadd-00"}
+POST /api/deals -> 201
+{"id":20,"contactId":21,"contactName":"Mia Park","accountId":9,"accountName":"Proof Co","title":"lower","value":1,"expectedCloseDate":"2026-12-01","stage":"NEGOTIATION","closedDate":null,"lostReason":null,"createdAt":"2026-10-12T11:10:15.596631Z","updatedAt":"2026-10-12T11:10:15.596631Z"}
+GET /api/deals?stage=won&size=1 -> 200
+{"items":[{"id":1,"contactId":1,"contactName":"Maya Okafor","accountId":1,"accountName":"Halcyon Freight","title":"Fleet telematics rollout","value":48000.00,"expectedCloseDate":"2026-10-02","stage":"WON","closedDate":"2026-10-02","lostReason":null,"createdAt":"2026-08-13T11:09:56.862585Z","updatedAt":"2026-10-02T11:09:56.862585Z"}],"page":0,"size":1,"total":5}
+DELETE /api/deals/20 -> 204
+
+
+### 10. Filtered list: deals of that account, and Won deals (2 rows)
+GET /api/deals?accountId=9 -> 200
+{"items":[{"id":19,"contactId":21,"contactName":"Mia Park","accountId":9,"accountName":"Proof Co","title":"Proof renewal","value":1234.56,"expectedCloseDate":"2026-12-01","stage":"NEGOTIATION","closedDate":null,"lostReason":null,"createdAt":"2026-10-12T11:10:13.511299Z","updatedAt":"2026-10-12T11:10:14.575719Z"}],"page":0,"size":20,"total":1}
+GET /api/deals?stage=Won&size=2 -> 200
+{"items":[{"id":1,"contactId":1,"contactName":"Maya Okafor","accountId":1,"accountName":"Halcyon Freight","title":"Fleet telematics rollout","value":48000.00,"expectedCloseDate":"2026-10-02","stage":"WON","closedDate":"2026-10-02","lostReason":null,"createdAt":"2026-08-13T11:09:56.862585Z","updatedAt":"2026-10-02T11:09:56.862585Z"},{"id":2,"contactId":3,"contactName":"Priya Nair","accountId":1,"accountName":"Halcyon Freight","title":"Invoice automation","value":18500.00,"expectedCloseDate":"2026-10-02","stage":"WON","closedDate":"2026-10-02","lostReason":null,"createdAt":"2026-08-13T11:09:56.8
+
+### 11. Delete rules: a plain USER may not delete (403); ADMIN is blocked by dependants (409)
+DELETE /api/deals/19 -> 403
+
+DELETE /api/accounts/9 -> 409
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"This account still has contacts. Move or delete them first.","code":"ACCOUNT_HAS_CONTACTS","traceId":"00-943f793512791630d57116f62389c26e-4a398f3a59122c17-00"}
+DELETE /api/contacts/21 -> 409
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"This contact still has deals or logged activities, so it cannot be deleted.","code":"CONTACT_HAS_HISTORY","traceId":"00-17eb4832bcd79c17196e1d1cd108e2af-d189f968187d5a4d-00"}
+
+### 12. Delete bottom-up as ADMIN (204 each), then it is gone (404)
+DELETE /api/deals/19 -> 204
+
+DELETE /api/contacts/21 -> 204
+
+DELETE /api/accounts/9 -> 204
+
+GET /api/accounts/9 -> 404
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.5","title":"Not Found","status":404,"detail":"That account does not exist.","code":"ACCOUNT_NOT_FOUND","traceId":"00-c74e3cdad5e900eedf61e9dd8bf18fd8-74a2e539bd5d21ca-00"}
+
+### 13. Cookie sign-in needs the CSRF token on a change
+cookie login -> 200
+POST /api/accounts (cookie, no token) -> 403
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Invalid or missing CSRF token.","status":403,"detail":"Fetch a token from GET /api/auth/csrf and send it in the X-CSRF-TOKEN header.","code":"CSRF_TOKEN_INVALID","traceId":"00-8315797d18c24e302931496b181e2223-efa4f908547c9525-00"}
+POST /api/accounts (cookie + X-CSRF-TOKEN) -> 201
+{"id":10,"name":"Cookie Co","industry":null,"country":null,"website":null,"createdAt":"2026-10-12T11:10:19.778161Z","contactCount":0}
+done
+
+### 14. Filters: WON, lower-case won, and a bad name
+GET /api/deals?stage=WON&size=1 -> 200
+{"items":[{"id":1,"contactId":1,"contactName":"Maya Okafor","accountId":1,"accountName":"Halcyon Freight","title":"Fleet telematics rollout","value":48000.00,"expectedCloseDate":"2026-10-02","stage":"WON","closedDate":"2026-10-02","lostReason":null,"createdAt":"2026-08-13T11:09:56.862585Z","updatedAt":"2026-10-02T11:09:56.862585Z"}],"page":0,"size":1,"total":5}
+GET /api/deals?stage=won&size=1 -> 200
+{"items":[{"id":1,"contactId":1,"contactName":"Maya Okafor","accountId":1,"accountName":"Halcyon Freight","title":"Fleet telematics rollout","value":48000.00,"expectedCloseDate":"2026-10-02","stage":"WON","closedDate":"2026-10-02","lostReason":null,"createdAt":"2026-08-13T11:09:56.862585Z","updatedAt":"2026-10-02T11:09:56.862585Z"}],"page":0,"size":1,"total":5}
+GET /api/deals?stage=Maybe -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"stage":["Must be one of: PROSPECTING, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST."]},"traceId":"00-f7aa159f20d4e0d2d6345b32a884349a-d0a46ab68d9567f3-00"}
+GET /api/deals?stage=1 -> 400
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"stage":["Must be one of: PROSPECTING, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST."]},"traceId":"00-20ae5a563efa8c524c702f9f62515f6e-0356433868d4fbe7-00"}
+GET /api/contacts?status=customer&size=1 -> 200
+{"items":[{"id":5,"accountId":2,"accountName":"Brightwater Foods","firstName":"Aoife","lastName":"Brennan","email":"aoife.brennan@brightwaterfoods.example","phone":null,"jobTitle":"Buying Director","status":"CUSTOMER","lastContactedAt":"2026-09-14T11:09:56.862585Z","createdAt":"2026-07-24T11:09:56.862585Z"}],"page":0,"size":1,"total":5}

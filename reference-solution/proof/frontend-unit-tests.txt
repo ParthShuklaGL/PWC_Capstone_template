@@ -1,0 +1,13 @@
+﻿
+> nimbus-crm-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.3 C:/Users/Parth Shukla/Downloads/CapstoneBoilerplate_react/reference-solution/frontend
+
+
+ Test Files  9 passed (9)
+      Tests  82 passed (82)
+   Start at  19:18:05
+   Duration  9.15s (environment 59%, tests 19%, setup 15%, transform 5%, import 3%)
+

@@ -1,0 +1,43 @@
+﻿
+> nimbus-crm-ui@0.1.0 e2e
+> node e2e/verify.mjs
+
+PASS  Jwt: header shows the user, role and method  [demo (USER) via JWT]
+PASS  Jwt: still signed in after a page reload
+PASS  Jwt: sign-out sends no CSRF request  [POST /api/auth/logout 204]
+PASS  Jwt: after sign-out and reload the sign-in screen is shown
+PASS  Jwt: replaying the signed-out token is refused (401)  [401]
+PASS  Cookie: header shows the user, role and method  [demo (USER) via cookie]
+PASS  Cookie: still signed in after a page reload
+PASS  Cookie: sign-out fetches a CSRF token first, then is accepted (204)  [GET /api/auth/csrf 200, POST /api/auth/logout 204]
+PASS  Cookie: after sign-out and reload the sign-in screen is shown
+PASS  Cookie: replaying the signed-out credential is refused (401)  [401]
+PASS  Session: header shows the user, role and method  [demo (USER) via session]
+PASS  Session: still signed in after a page reload
+PASS  Session: sign-out fetches a CSRF token first, then is accepted (204)  [GET /api/auth/csrf 200, POST /api/auth/logout 204]
+PASS  Session: after sign-out and reload the sign-in screen is shown
+PASS  Session: replaying the signed-out credential is refused (401)  [401]
+PASS  wrong password shows the generic message  [Invalid username or password.]
+PASS  wrong password flags neither field
+PASS  register: each server field message appears beside its own input  [Username -> 'Username' must be between 3 and 50 characters. You entered 1 characters. | Email -> 'Email' is not a valid email address. | Password -> P]
+PASS  register: a valid registration signs the new user in as USER  [uimv6qha8h (USER) via JWT]
+PASS  USER: the Users link is not shown
+PASS  USER: the "Users by role" report is not shown
+PASS  USER: three report sections are shown
+PASS  USER: opening /users shows the "no access" page
+PASS  ADMIN: four report sections are shown
+PASS  deals by stage: six stages in pipeline order with GBP values  [Prospecting | 3 | £46,850.50]
+PASS  contacts per account: biggest first, and an account with none is listed  [Halcyon Freight | 4 ... Ashford Legal | 0]
+PASS  activities per user: admin 20, demo 10  [admin | 20 / demo | 10]
+PASS  CSV deals-by-stage: saved as deals-by-stage-2026-10-13.csv, header row and CRLF correct  [Stage,Deals,TotalValueGbp / PROSPECTING,3,46850.50]
+PASS  CSV contacts-per-account: saved as contacts-per-account-2026-10-13.csv, header row and CRLF correct  [AccountId,Account,Contacts / 1,Halcyon Freight,4]
+PASS  CSV activities-per-user: saved as activities-per-user-2026-10-13.csv, header row and CRLF correct  [UserId,Username,Activities / 1,admin,20]
+PASS  CSV users-by-role: saved as users-by-role-2026-10-13.csv, header row and CRLF correct  [Role,Users / USER,5]
+PASS  ADMIN: the users list shows people and never a password column  [admin, alice, bob]
+PASS  a signed-out credential sends the user to sign-in with "Your session ended"  [Your session ended. Please sign in again.]
+PASS  reports page does not scroll sideways at 320px wide  [0px over]
+PASS  reports page does not scroll sideways at 390px wide  [0px over]
+PASS  reports page does not scroll sideways at 768px wide  [0px over]
+PASS  reports page does not scroll sideways at 1100px wide  [0px over]
+
+37 of 37 checks passed

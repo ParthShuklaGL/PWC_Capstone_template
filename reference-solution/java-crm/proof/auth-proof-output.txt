@@ -1,0 +1,433 @@
+# Live proof of the three sign-in modes, CSRF and roles against the JAVA backend (nimbus_crm/scripts/auth-proof.sh, BASE_URL=http://localhost:5091).
+# Cache-Control is filtered out of this transcript by the script itself; see headers-and-reports.txt for it.
+# Tokens, cookies and CSRF values are redacted.
+
+=================== 0. REGISTER, and a response never contains a password hash ===================
+
+$ curl -X POST http://localhost:5091/api/auth/register -H Content-Type: application/json -d {"username":"proof_1791803421","email":"proof_1791803421@example.com","password":"Proof#Pass-2026!"}
+HTTP/1.1 201 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":3,"username":"proof_1791803421","email":"proof_1791803421@example.com","role":"USER","isActive":true,"createdAt":"2026-10-12T11:10:22.030541Z"}
+
+
+$ curl -X POST http://localhost:5091/api/auth/register -H Content-Type: application/json -d {"username":"proof_1791803421","email":"other-proof_1791803421@example.com","password":"Proof#Pass-2026!"}
+HTTP/1.1 409 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.10","title":"Conflict","status":409,"detail":"That username is already taken.","code":"USERNAME_TAKEN","traceId":"00-217051bdeaa05393345968e95261a8f8-2d432b9f3de33bf1-00"}
+
+
+$ curl -X POST http://localhost:5091/api/auth/register -H Content-Type: application/json -d {"username":"x","email":"not-an-email","password":"short"}
+HTTP/1.1 400 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+Connection: close
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"Username":["'Username' must be between 3 and 50 characters. You entered 1 characters."],"Email":["'Email' is not a valid email address."],"Password":["Password must be at least 10 characters."]},"traceId":"00-4c93f84b3763b2e28bedd3024eb923d3-e70510a0c97095f2-00"}
+
+
+=================== 0b. LOGIN failures give the same answer for a wrong password and an unknown user ===================
+
+$ curl -X POST http://localhost:5091/api/auth/login -H Content-Type: application/json -d {"username":"demo","password":"wrong-password"}
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"detail":"Invalid username or password.","code":"INVALID_CREDENTIALS","traceId":"00-2b103a853116e08a68f4e569363e7e83-3b004a5d203e9b77-00"}
+
+
+$ curl -X POST http://localhost:5091/api/auth/login -H Content-Type: application/json -d {"username":"nobody","password":"wrong-password"}
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.2","title":"Unauthorized","status":401,"detail":"Invalid username or password.","code":"INVALID_CREDENTIALS","traceId":"00-eb320ff25f6cf3737f2549fe3b61298e-3c6b005c7242ccb3-00"}
+
+
+=================== 1A. JWT BEARER ALONE: login, call, logout, call again ===================
+
+$ curl -X POST http://localhost:5091/api/auth/login -H Content-Type: application/json -d {"username":"demo","password":"User#Dev-2026!","mode":"Jwt"}
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"user":{"id":2,"username":"demo","email":"demo@nimbuscrm.dev","role":"USER","isActive":true,"createdAt":"2026-10-12T11:09:56.208988Z"},"mode":"Jwt","accessToken":"<redacted>","expiresAt":"2026-10-12T11:25:24.686583Z"}
+
+
+$ curl http://localhost:5091/api/auth/me -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Bearer"}
+
+
+$ curl -X POST http://localhost:5091/api/auth/logout -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 204 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl http://localhost:5091/api/auth/me -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+=================== 1B. HTTPONLY COOKIE ALONE: login, call, logout needs CSRF, call again, replay the old cookie ===================
+
+$ curl -c <tmp>/cookie.jar -X POST http://localhost:5091/api/auth/login -H Content-Type: application/json -d {"username":"demo","password":"User#Dev-2026!","mode":"Cookie"}
+HTTP/1.1 200 
+Set-Cookie: crm.auth=<redacted>; Path=/; Max-Age=3600; Expires=Mon, 12 Oct 2026 12:10:26 GMT; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"user":{"id":2,"username":"demo","email":"demo@nimbuscrm.dev","role":"USER","isActive":true,"createdAt":"2026-10-12T11:09:56.208988Z"},"mode":"Cookie","accessToken":null,"expiresAt":"2026-10-12T12:10:26.061979Z"}
+
+
+$ curl -b <tmp>/cookie.jar http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Cookies"}
+
+# logout WITHOUT a CSRF token is refused:
+
+$ curl -b <tmp>/cookie.jar -X POST http://localhost:5091/api/auth/logout
+HTTP/1.1 403 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Invalid or missing CSRF token.","status":403,"detail":"Fetch a token from GET /api/auth/csrf and send it in the X-CSRF-TOKEN header.","code":"CSRF_TOKEN_INVALID","traceId":"00-a26327a768164c4c997aace00b849fec-cb66d45b769ed6d5-00"}
+
+# logout WITH the token:
+
+$ curl -b <tmp>/cookie.jar -X POST http://localhost:5091/api/auth/logout -H X-CSRF-TOKEN: <redacted>
+HTTP/1.1 204 
+Set-Cookie: crm.auth=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b <tmp>/cookie.jar http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+# replay of the OLD cookie:
+
+$ curl -b <tmp>/cookie.old http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+=================== 1C. SERVER-SIDE SESSION ALONE: login, call, logout needs CSRF, call again, replay the old cookie ===================
+
+$ curl -c <tmp>/session.jar -X POST http://localhost:5091/api/auth/login -H Content-Type: application/json -d {"username":"demo","password":"User#Dev-2026!","mode":"Session"}
+HTTP/1.1 200 
+Set-Cookie: crm.session=<redacted>; Path=/; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"user":{"id":2,"username":"demo","email":"demo@nimbuscrm.dev","role":"USER","isActive":true,"createdAt":"2026-10-12T11:09:56.208988Z"},"mode":"Session","accessToken":null,"expiresAt":null}
+
+
+$ curl -b <tmp>/session.jar http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Session"}
+
+
+$ curl -b <tmp>/session.jar -X POST http://localhost:5091/api/auth/logout
+HTTP/1.1 403 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/problem+json
+
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.4","title":"Invalid or missing CSRF token.","status":403,"detail":"Fetch a token from GET /api/auth/csrf and send it in the X-CSRF-TOKEN header.","code":"CSRF_TOKEN_INVALID","traceId":"00-65554b7098b6b93914b8da159a4f2abd-00a2ea1137978b32-00"}
+
+
+$ curl -b <tmp>/session.jar -X POST http://localhost:5091/api/auth/logout -H X-CSRF-TOKEN: <redacted>
+HTTP/1.1 204 
+Set-Cookie: crm.session=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b <tmp>/session.jar http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b <tmp>/session.old http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+=================== 2. ALL THREE TOGETHER: none overrides another ===================
+# each credential on its own:
+
+$ curl http://localhost:5091/api/auth/me -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Bearer"}
+
+
+$ curl -b crm.auth=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Cookies"}
+
+
+$ curl -b crm.session=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Session"}
+
+# all three sent at once (Bearer takes precedence):
+
+$ curl http://localhost:5091/api/auth/me -H Authorization: Bearer eyJ<redacted> -b crm.auth=<redacted>; crm.session=<redacted>
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Bearer"}
+
+# sign out of the JWT only. The other two must keep working:
+
+$ curl -X POST http://localhost:5091/api/auth/logout -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 204 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl http://localhost:5091/api/auth/me -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b crm.auth=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Cookies"}
+
+
+$ curl -b crm.session=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Session"}
+
+# sign out of the cookie only. The session must keep working:
+
+$ curl -b crm.auth=<redacted>; crm.csrf=<redacted> -X POST http://localhost:5091/api/auth/logout -H X-CSRF-TOKEN: <redacted>
+HTTP/1.1 204 
+Set-Cookie: crm.auth=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b crm.auth=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b crm.session=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+{"id":2,"username":"demo","role":"USER","authenticatedVia":"Session"}
+
+# finally sign out of the session:
+
+$ curl -b crm.session=<redacted>; crm.csrf=<redacted> -X POST http://localhost:5091/api/auth/logout -H X-CSRF-TOKEN: <redacted>
+HTTP/1.1 204 
+Set-Cookie: crm.session=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl -b crm.session=<redacted> http://localhost:5091/api/auth/me
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+=================== 3. ROLES on GET /api/users: anonymous 401, USER 403, ADMIN 200 ===================
+
+$ curl http://localhost:5091/api/users
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+# USER:
+
+$ curl http://localhost:5091/api/users -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 403 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+# ADMIN:
+
+$ curl http://localhost:5091/api/users -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Content-Type: application/json
+
+[{"id":1,"username":"admin","email":"admin@nimbuscrm.dev","role":"ADMIN","isActive":true,"createdAt":"2026-10-12T11:09:55.224462Z"},{"id":2,"username":"demo","email":"demo@nimbuscrm.dev","role":"USER","isActive":true,"createdAt":"2026-10-12T11:09:56.208988Z"},{"id":3,"username":"proof_1791803421","email":"proof_1791803421@example.com","role":"USER","isActive":true,"createdAt":"2026-10-12T11:10:22.030541Z"}]
+
+# the same rule through the other two modes (status only):
+demo via Cookie -> 403
+demo via Session -> 403
+admin via Cookie -> 200
+admin via Session -> 200
+# invalid and tampered tokens:
+
+$ curl http://localhost:5091/api/users -H Authorization: Bearer not.a.token
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+
+
+$ curl http://localhost:5091/api/users -H Authorization: Bearer eyJ<redacted>
+HTTP/1.1 401 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+
+

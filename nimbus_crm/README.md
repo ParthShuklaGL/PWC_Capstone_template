@@ -106,7 +106,7 @@ There is no API for logging activities yet; the seeded activities feed the "acti
 ## Screenshots
 
 What the frontend described in [docs/](docs) looks like when built against this API: nine screenshots of a reference
-implementation, in [docs/screenshots](docs/screenshots). The reference source is not published; students build their own.
+implementation, in [docs/screenshots](docs/screenshots). The reference source is in [../reference-solution](../reference-solution) for mentors; students build their own.
 
 | Sign in | Reports (ADMIN) | Users (ADMIN) |
 |---|---|---|

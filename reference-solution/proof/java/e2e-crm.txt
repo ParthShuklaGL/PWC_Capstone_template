@@ -1,0 +1,79 @@
+﻿
+> nimbus-crm-ui@0.1.0 e2e:crm
+> node e2e/crm-verify.mjs
+
+PASS  nav: Reports, Accounts, Contacts, Deals and (ADMIN) Users links are shown
+PASS  accounts: the list shows rows with name, industry, country, website and contact count  [8 rows]
+PASS  accounts: ADMIN sees Delete buttons
+PASS  account form: a blank name is flagged beside the Name input
+PASS  account form: the server answers 400
+PASS  account form: the server message for Website is beside the Website input and nowhere else  [Website must be a full http or https address.]
+PASS  account: created, and found by search with its website
+PASS  account: the edit form starts with the saved values
+PASS  account: edited, and the list shows the new industry and country
+PASS  contact form: the server message for Email is beside the Email input  ['Email' is not a valid email address.]
+PASS  contact: created with its account and status, and found by search
+PASS  contact: edited (status Customer to Prospect)
+PASS  contact: the Deals link opens the deals list filtered to that contact
+PASS  deals: a contact with no deals shows the empty message
+PASS  deal form: the contact is preselected from the filter
+PASS  deal form: the server message for Value is beside the Value input  ['Value' must be between 0 and 1000000000000. You entered -5.]
+PASS  deal form: lost reason is hidden until the stage is Lost
+PASS  deal form: choosing Lost shows the lost reason input
+PASS  deal form: Lost without a reason is refused beside the reason input
+PASS  deal form: choosing another stage hides the lost reason again
+PASS  deal: created, shown with contact, account, GBP value, expected close date and stage  [E2E renewal mv6qjqvy E2EAda Lovelacemv6qjqvy E2E Acme mv6qjqvy £1,234.50 15 Jan 2027 Prospecting Qualified Proposal Negotiation Won Lost — EditDelete]
+PASS  deal: an open deal has no closed date
+PASS  deal: the stage select to Won shows the date the server stamped as closed  [13 Oct 2026 vs 13 Oct 2026]
+PASS  deal: the pipeline summary counted the new Won deal  [5 -> 6]
+PASS  deal: moving to Lost asks for a reason and refuses an empty one
+PASS  deal: Lost with a reason is saved and the reason is shown
+PASS  deal: reopening clears the closed date and the lost reason
+PASS  deal: edited through the form (value now £2,000.00)
+PASS  delete: a confirm dialog names the account first
+PASS  delete: Cancel sends nothing and leaves the row
+PASS  delete: an account with contacts is refused (409) and the server message is shown  [This account still has contacts. Move or delete them first.
+Dismiss]
+PASS  delete: a contact with deals is refused (409) and the server message is shown  [This contact still has deals or logged activities, so it cannot be deleted.
+Dismiss]
+PASS  USER: Accounts list shows Edit buttons but no Delete buttons  [9 edit buttons]
+PASS  USER: Contacts list shows Edit buttons but no Delete buttons  [10 edit buttons]
+PASS  USER: Deals list shows Edit buttons but no Delete buttons  [10 edit buttons]
+PASS  USER: a delete sent straight to the API is refused (403)  [403]
+PASS  USER (cookie): a stage change is accepted, so the CSRF token was sent
+PASS  contacts: the first page has 10 rows and the pager shows the total  [10 rows of 21]
+PASS  contacts: Next shows different rows and "Page 2"
+PASS  contacts: the status filter sends status=CUSTOMER
+PASS  contacts: every row shown is a Customer
+PASS  contacts: the account filter sends accountId
+PASS  contacts: the rows narrow to that account and status  [2 rows]
+PASS  contacts: search matches the name or email  [1 rows]
+PASS  accounts: the contact count links to that account's contacts  [4 contacts]
+PASS  deals: the pipeline summary shows six stages with deal counts and GBP values  [PROSPECTING 3 deals £46,850.50]
+PASS  deals: the stage filter sends stage=WON
+PASS  deals: only Won deals are listed, each with a closed date  [5 rows]
+PASS  deals: the account filter narrows the list to that account  [4 rows]
+PASS  deals: a search with no match shows the empty message
+PASS  Jwt: creating a deal is accepted (201)
+PASS  Jwt: a Bearer token is sent and no CSRF token  [{"method":"POST","pathname":"/api/deals","csrf":false,"bearer":true}]
+PASS  Jwt: ADMIN deleting a deal is accepted (204)
+PASS  Jwt: the deleted deal is gone from the list
+PASS  Jwt: the delete also carried the right credential  [{"method":"DELETE","pathname":"/api/deals/20","csrf":false,"bearer":true}]
+PASS  Cookie: creating a deal is accepted (201)
+PASS  Cookie: the X-CSRF-TOKEN header is sent  [{"method":"POST","pathname":"/api/deals","csrf":true,"bearer":false}]
+PASS  Cookie: ADMIN deleting a deal is accepted (204)
+PASS  Cookie: the deleted deal is gone from the list
+PASS  Cookie: the delete also carried the right credential  [{"method":"DELETE","pathname":"/api/deals/21","csrf":true,"bearer":false}]
+PASS  Session: creating a deal is accepted (201)
+PASS  Session: the X-CSRF-TOKEN header is sent  [{"method":"POST","pathname":"/api/deals","csrf":true,"bearer":false}]
+PASS  Session: ADMIN deleting a deal is accepted (204)
+PASS  Session: the deleted deal is gone from the list
+PASS  Session: the delete also carried the right credential  [{"method":"DELETE","pathname":"/api/deals/22","csrf":true,"bearer":false}]
+PASS  deals: a signed-out credential sends the user to sign-in with "Your session ended"
+PASS  accounts, contacts, deals and the deal form do not scroll sideways at 320px wide  [{"Accounts":0,"Contacts":0,"Deals":0,"dealForm":0}]
+PASS  accounts, contacts, deals and the deal form do not scroll sideways at 390px wide  [{"Accounts":0,"Contacts":0,"Deals":0,"dealForm":0}]
+PASS  accounts, contacts, deals and the deal form do not scroll sideways at 768px wide  [{"Accounts":0,"Contacts":0,"Deals":0,"dealForm":0}]
+PASS  accounts, contacts, deals and the deal form do not scroll sideways at 1100px wide  [{"Accounts":0,"Contacts":0,"Deals":0,"dealForm":0}]
+PASS  cleanup: the UI deleted everything this run created (the API safety net found nothing left)  [0 left]
+
+71 of 71 checks passed

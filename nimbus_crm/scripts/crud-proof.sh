@@ -5,8 +5,9 @@
 # Needs the API running in Development (so the seeder has created admin / demo and the sample data):
 #   cd nimbus_crm && dotnet run --project src/Api --launch-profile http
 # Start it with Auth__LoginRateLimitPerMinute=1000 if you run this more than a few times a minute.
+# BASE_URL overrides the address (default http://localhost:5090), so it can be pointed at any backend with the same contract.
 # Cleans up after itself (it deletes what it creates). Run: bash scripts/crud-proof.sh
-B=http://localhost:5090
+B="${BASE_URL:-http://localhost:5090}"
 J='Content-Type: application/json'
 
 say() { printf '\n### %s\n' "$1"; }
