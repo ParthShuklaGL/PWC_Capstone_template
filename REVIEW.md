@@ -80,6 +80,7 @@ Folder: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/fsd-boi
 
 Taken on 2026-10-13 from the reference solution, with the seeded sample data. The same frontend ran unchanged against each backend.
 
+- Gallery with a description of every picture (32 for .NET, 31 for Java): https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/reference-solution/screenshots/README.md
 - .NET backend: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/screenshots/dotnet
 - Java backend: https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/screenshots/java
 - Check logs (37 and 71 browser checks per backend, 82 unit tests): https://github.com/ParthShuklaGL/PWC_Capstone_template/tree/main/reference-solution/proof

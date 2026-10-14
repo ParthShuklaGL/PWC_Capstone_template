@@ -12,7 +12,8 @@
     "e2e": "node e2e/verify.mjs",
     "screenshots": "node e2e/screenshots.mjs",
     "e2e:crm": "node e2e/crm-verify.mjs",
-    "screenshots:crm": "node e2e/crm-screenshots.mjs"
+    "screenshots:crm": "node e2e/crm-screenshots.mjs",
+    "screenshots:more": "node e2e/crm-screenshots-more.mjs"
   },
   "dependencies": {
     "react": "19.3.0",

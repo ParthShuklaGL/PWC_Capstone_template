@@ -23,8 +23,8 @@ reference-solution/
   stop-all.ps1         stop them again
   frontend/            React + TypeScript app (src/, e2e/ browser checks and screenshot generators, vite.config.ts)
   java-crm/            the Java Spring Boot backend (see its README, PARITY.md and EFFORT.md; run.ps1 / stop.ps1)
-  screenshots/dotnet/  17 pictures taken against the .NET backend
-  screenshots/java/    the same 17 taken against the Java backend
+  screenshots/dotnet/  32 pictures taken against the .NET backend (index in screenshots/README.md)
+  screenshots/java/    the same 31 against the Java backend
   proof/               test and browser-check logs (proof/dotnet, proof/java, plus the frontend unit tests and build)
 ```
 
@@ -69,6 +69,7 @@ Run these from `frontend/`:
 | `npm run e2e` | 37 checks in a real browser against the real API (below) | **yes** |
 | `npm run e2e:crm` | 71 checks of the accounts, contacts and deals screens in a real browser against the real API (below) | **yes** |
 | `npm run screenshots` | retakes the nine published screenshots | **yes** |
+| `npm run screenshots:more` | takes the 13 extra pictures (forms, dialogs, USER and phone views) | **yes** |
 | `npm run screenshots:crm` | takes the eight CRM screenshots into `reference-solution/screenshots/` | **yes** |
 
 For the last two start the app with a higher sign-in limit (the checks sign in about 30 times; the API normally allows 10 a minute):

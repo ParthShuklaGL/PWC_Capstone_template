@@ -1,0 +1,5 @@
+﻿
+> nimbus-crm-ui@0.1.0 screenshots:more
+> node e2e/crm-screenshots-more.mjs
+
+Saved 13 screenshots to C:\Users\Parth Shukla\Downloads\CapstoneBoilerplate_react\reference-solution\screenshots\java: 10-account-edit-form, 11-contacts-list, 12-contact-new-form, 13-contact-edit-form, 14-contact-blocked-delete, 15-deal-new-form, 16-deal-lost-reason-dialog, 17-deal-delete-confirm, 18-accounts-user-no-delete, 19-contacts-user-no-delete, 20-accounts-phone, 21-contacts-phone, 22-contact-form-phone
