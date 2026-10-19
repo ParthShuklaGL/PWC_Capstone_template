@@ -1,0 +1,10 @@
+bin/
+obj/
+node_modules/
+dist/
+.vs/
+*.user
+.DS_Store
+playwright-report/
+test-results/
+.env

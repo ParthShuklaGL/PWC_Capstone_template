@@ -1,0 +1,12 @@
+{
+  "rest-client.environmentVariables": {
+    "$shared": {}
+  },
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/node_modules": true
+  },
+  "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  "editor.formatOnSave": false
+}

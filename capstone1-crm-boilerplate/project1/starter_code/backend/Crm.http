@@ -1,0 +1,125 @@
+@host = http://localhost:5080
+
+### One page of contacts, in surname order
+GET {{host}}/api/contacts?page=0&size=20
+
+### Filtered to the people who are already paying us
+GET {{host}}/api/contacts?page=0&size=20&status=CUSTOMER
+
+### Find someone
+GET {{host}}/api/contacts/search?q=Fenwick
+
+### One contact
+GET {{host}}/api/contacts/C-00089
+
+### Their activity history
+GET {{host}}/api/contacts/C-00089/activities
+
+### Every account
+GET {{host}}/api/accounts
+
+### The people at one account
+GET {{host}}/api/accounts/A-0024/contacts
+
+### The agency's monthly lead file
+POST {{host}}/api/contacts/import
+Content-Type: text/csv
+
+< ../docs/sample-leads.csv
+
+###############################################################################
+# Deals. Open this file in VS Code with the REST Client extension and click
+# "Send Request" above any request. Run them top to bottom the first time.
+###############################################################################
+
+### One page of deals, soonest expected close first
+GET {{host}}/api/deals?page=0&size=20
+
+### Only the deals in negotiation
+GET {{host}}/api/deals?stage=NEGOTIATION
+
+### A stage name nobody recognises is a 400, not a 500
+GET {{host}}/api/deals?stage=NEGOTIATIONS
+
+### The number that matters: count and value per stage, plus the open total
+GET {{host}}/api/deals/summary
+
+### One deal
+GET {{host}}/api/deals/D-00016
+
+### Its history. There is no "who": the app has no authentication
+GET {{host}}/api/deals/D-00016/history
+
+### An unknown deal is a 404 with a stable code
+GET {{host}}/api/deals/D-99999
+
+### The deals one contact is driving
+GET {{host}}/api/contacts/C-00003/deals
+
+### Create a deal (account and contact must go together: C-00001 works at A-0008)
+# @name createDeal
+POST {{host}}/api/deals
+Content-Type: application/json
+
+{
+  "title": "Procurement analytics, phase two",
+  "accountRef": "A-0008",
+  "contactRef": "C-00001",
+  "value": 25000,
+  "expectedCloseDate": "2026-12-31"
+}
+
+### The same, with a contact from another account: 400 with fields.contactRef
+POST {{host}}/api/deals
+Content-Type: application/json
+
+{
+  "title": "Wrong contact",
+  "accountRef": "A-0001",
+  "contactRef": "C-00001",
+  "value": 25000,
+  "expectedCloseDate": "2026-12-31"
+}
+
+### An empty body: 400 with every missing field named
+POST {{host}}/api/deals
+Content-Type: application/json
+
+{}
+
+### Edit it (use the dealRef from the response above)
+PUT {{host}}/api/deals/D-00033
+Content-Type: application/json
+
+{
+  "title": "Procurement analytics, phase two (revised)",
+  "value": 27500,
+  "expectedCloseDate": "2027-01-15"
+}
+
+### Move forward one stage: allowed
+POST {{host}}/api/deals/D-00033/stage
+Content-Type: application/json
+
+{ "stage": "QUALIFIED" }
+
+### Jump two stages: 409 DEAL_STAGE_TRANSITION_INVALID
+POST {{host}}/api/deals/D-00033/stage
+Content-Type: application/json
+
+{ "stage": "NEGOTIATION" }
+
+### Lose a deal without a reason: 400 with fields.lostReason
+POST {{host}}/api/deals/D-00033/stage
+Content-Type: application/json
+
+{ "stage": "LOST" }
+
+### Win a deal that is in NEGOTIATION: needs a closeDate, and makes the contact a Customer
+POST {{host}}/api/deals/D-00016/stage
+Content-Type: application/json
+
+{ "stage": "WON", "closeDate": "2026-10-05" }
+
+### Delete a deal: only PROSPECTING deals can be deleted, anything else is 409
+DELETE {{host}}/api/deals/D-00004

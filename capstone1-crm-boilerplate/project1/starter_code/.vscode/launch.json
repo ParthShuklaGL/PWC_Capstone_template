@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API (.NET) - local MySQL (appsettings.json)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/backend/NimbusSales.Crm.Api/bin/Debug/net10.0/NimbusSales.Crm.Api.dll",
+      "cwd": "${workspaceFolder}/backend/NimbusSales.Crm.Api",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "stopAtEntry": false
+    },
+    {
+      "name": "API (.NET) - MySQL in Docker (docker compose up -d db)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/backend/NimbusSales.Crm.Api/bin/Debug/net10.0/NimbusSales.Crm.Api.dll",
+      "cwd": "${workspaceFolder}/backend/NimbusSales.Crm.Api",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Crm": "Server=localhost;Port=3307;Database=nimbus_crm;User=crm_app;Password=Crm#App2026"
+      },
+      "stopAtEntry": false
+    }
+  ]
+}

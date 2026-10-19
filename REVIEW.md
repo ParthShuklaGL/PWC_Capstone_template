@@ -108,3 +108,11 @@ Taken on 2026-10-13 from the reference solution, with the seeded sample data. Th
 - .NET: no API for logging activities.
 - .NET: deferred hardening items (xunit v3 migration, register user enumeration, session-id rotation, shared session store).
 - Java: default development secrets are public in the repository; replace them before any real use.
+
+## 7. Capstone 1 starter (Pipeline CRM, frontend capstone)
+
+Added 2026-10-19. The starter in `capstone1-crm-boilerplate/project1/starter_code` is a .NET 10 + MySQL backend with a React frontend that learners extend with GitHub Copilot. This commit also publishes a **mentor-only reference build of US-03 to US-07** in that frontend (Bootstrap UI, dashboard, CSV reports, 32 Vitest tests). Remove the finished screens before handing the starter to learners.
+
+- Backend fix: the deals API returned 500 (`DateTime` to `DateOnly` cast on MySQL); fixed in `CrmDbContext.cs`. The backend crosscheck now reports 98 passed, 0 failed.
+- Screenshots (taken against the live API): [dashboard](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/01-dashboard.png), [contacts](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/02-contacts-list.png), [deals list](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/03-deals-list.png), [deal detail](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/04-deal-detail.png), [pipeline board](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/05-pipeline-board.png), [new-deal validation](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/06-new-deal-validation.png), [contact with deals and activity form](https://github.com/ParthShuklaGL/PWC_Capstone_template/blob/main/nimbus_crm/docs/screenshots/capstone1-starter/07-contact-detail.png).
+- Not yet done: no Playwright specs (US-08), no CI/nginx fixes (US-10); the crosscheck leaves two test deals (D-00033, D-00034) behind.

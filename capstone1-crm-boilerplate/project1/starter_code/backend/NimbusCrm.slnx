@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="NimbusSales.Crm.Api/NimbusSales.Crm.Api.csproj" />
+  <Project Path="NimbusSales.Crm.Tests/NimbusSales.Crm.Tests.csproj" />
+</Solution>

@@ -1,0 +1,94 @@
+Run #47 · pipeline-crm · ci.yml · push to main
+Triggered 3 weeks ago by priya-r
+2 jobs: backend (success), frontend (failure)
+
+================================================================================
+JOB: backend                                                          ✔ success
+================================================================================
+
+##[group]Run actions/checkout@v4
+Syncing repository: nimbus-sales/pipeline-crm
+##[endgroup]
+
+##[group]Run actions/setup-dotnet@v4
+Installed .NET SDK 10.0.400
+DOTNET_ROOT=/usr/share/dotnet
+##[endgroup]
+
+##[group]Run dotnet restore
+  Determining projects to restore...
+  Restored /home/runner/work/pipeline-crm/pipeline-crm/backend/NimbusSales.Crm.Api/NimbusSales.Crm.Api.csproj (in 2.4 sec).
+  Restored /home/runner/work/pipeline-crm/pipeline-crm/backend/NimbusSales.Crm.Tests/NimbusSales.Crm.Tests.csproj (in 2.4 sec).
+##[endgroup]
+
+##[group]Run dotnet build --no-restore --configuration Release
+  NimbusSales.Crm.Api -> /home/runner/work/pipeline-crm/pipeline-crm/backend/NimbusSales.Crm.Api/bin/Release/net10.0/NimbusSales.Crm.Api.dll
+  NimbusSales.Crm.Tests -> /home/runner/work/pipeline-crm/pipeline-crm/backend/NimbusSales.Crm.Tests/bin/Release/net10.0/NimbusSales.Crm.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:18.42
+##[endgroup]
+
+##[group]Run dotnet test --no-build --configuration Release
+  Determining projects to restore...
+Passed!  - Failed:     0, Passed:     8, Skipped:     0, Total:     8, Duration: 131 ms - NimbusSales.Crm.Tests.dll (net10.0)
+##[endgroup]
+
+================================================================================
+JOB: frontend                                                         ✘ failure
+================================================================================
+
+##[group]Run actions/checkout@v4
+Syncing repository: nimbus-sales/pipeline-crm
+##[endgroup]
+
+##[group]Run actions/setup-node@v4
+Found in cache @ /opt/hostedtoolcache/node/18.20.8/x64
+Environment details
+  node: v18.20.8
+  npm: 10.8.2
+Cache restored from key: node-cache-Linux-x64-npm-2d91ac...
+##[endgroup]
+
+##[group]Run npm ci
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'vite@8.2.2',
+npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@vitejs/plugin-react@6.1.1',
+npm warn EBADENGINE   required: { node: '^20.19.0 || >=22.12.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+
+added 30 packages, and audited 31 packages in 4s
+found 0 vulnerabilities
+##[endgroup]
+
+##[group]Run npm run typecheck
+> pipeline-crm-ui@0.1.0 typecheck
+> tsc --noEmit
+##[endgroup]
+
+##[group]Run npm run build
+> pipeline-crm-ui@0.1.0 build
+> tsc --noEmit && vite build
+
+failed to load config from /home/runner/work/pipeline-crm/pipeline-crm/frontend/vite.config.ts
+error during build:
+TypeError: crypto.hash is not a function
+    at getHash (file:///home/runner/work/pipeline-crm/pipeline-crm/frontend/node_modules/vite/dist/node/chunks/dep-Bs2wpYCS.js:11324:21)
+    at getLockfileHash (file:///home/runner/work/pipeline-crm/pipeline-crm/frontend/node_modules/vite/dist/node/chunks/dep-Bs2wpYCS.js:11334:9)
+    at getDepHash (file:///home/runner/work/pipeline-crm/pipeline-crm/frontend/node_modules/vite/dist/node/chunks/dep-Bs2wpYCS.js:11338:23)
+    at initDepsOptimizerMetadata (file:///home/runner/work/pipeline-crm/pipeline-crm/frontend/node_modules/vite/dist/node/chunks/dep-Bs2wpYCS.js:10897:53)
+    at createDepsOptimizer (file:///home/runner/work/pipeline-crm/pipeline-crm/frontend/node_modules/vite/dist/node/chunks/dep-Bs2wpYCS.js:41055:65)
+##[error]Process completed with exit code 1
+##[endgroup]
+
+================================================================================
+Run #47 failed after 1m 38s
+================================================================================

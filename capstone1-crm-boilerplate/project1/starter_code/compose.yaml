@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: "Nimbus#Root2026"
+      MYSQL_DATABASE: nimbus_crm
+      MYSQL_USER: crm_app
+      MYSQL_PASSWORD: "Crm#App2026"
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Crm: "Server=db;Port=3306;Database=nimbus_crm;User=crm_app;Password=Crm#App2026"
+      Kestrel__Endpoints__Http__Url: "http://+:5080"
+    ports:
+      - "5080:5080"
+
+volumes:
+  db_data:
