@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchDeals } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import Pagination from '../components/Pagination.tsx';
 import StageBadge from '../components/StageBadge.tsx';
 import { PAGE_SIZE, STAGES, formatDate, formatMoney, formatStage } from '../constants.ts';
@@ -8,6 +9,7 @@ import type { Deal, LoadStatus } from '../types.ts';
 
 export default function DealsPage() {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [params, setParams] = useSearchParams();
   const stage = params.get('stage') ?? 'ALL';
   const page = Number(params.get('page') ?? '0') || 0;
@@ -54,11 +56,18 @@ export default function DealsPage() {
   return (
     <section>
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-        <h1 className="mb-0">Deals</h1>
-        <button type="button" className="btn btn-primary" onClick={() => navigate('/deals/new')}>
-          <i className="bi bi-plus-lg me-1" aria-hidden="true" />
-          New deal
-        </button>
+        <div>
+          <h1 className="mb-0">{isAdmin ? 'Deals' : 'My deals'}</h1>
+          <div className="text-secondary small">
+            {isAdmin ? 'Every deal, for every rep' : 'The deals you own. Other reps’ deals are not shown.'}
+          </div>
+        </div>
+        {isAdmin && (
+          <button type="button" className="btn btn-primary" onClick={() => navigate('/deals/new')}>
+            <i className="bi bi-plus-lg me-1" aria-hidden="true" />
+            New deal
+          </button>
+        )}
       </div>
 
       <div className="btn-group flex-wrap mb-3" role="group" aria-label="Filter deals by stage">
@@ -107,6 +116,7 @@ export default function DealsPage() {
                     </th>
                     <th scope="col">Expected close</th>
                     <th scope="col">Stage</th>
+                    <th scope="col">Owner</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -125,6 +135,7 @@ export default function DealsPage() {
                       <td>
                         <StageBadge stage={deal.stage} />
                       </td>
+                      <td className="small">{deal.ownerName}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchContacts, fetchDealSummary, fetchDeals } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import StageBadge from '../components/StageBadge.tsx';
 import { PAGE_SIZE, STAGE_COLOURS, formatDate, formatMoney, formatStage } from '../constants.ts';
 import { downloadCsv, toCsv, today } from '../csv.ts';
@@ -50,6 +51,7 @@ async function allContacts(): Promise<ContactSummary[]> {
 }
 
 export default function DashboardPage() {
+  const { user, isAdmin } = useAuth();
   const [summary, setSummary] = useState<DealSummary | null>(null);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [contactTotal, setContactTotal] = useState(0);
@@ -160,16 +162,20 @@ export default function DashboardPage() {
       <div className="hero card border-0 text-white mb-4">
         <div className="row align-items-center g-3 p-4">
           <div className="col-md-7">
-            <h1 className="display-6 fw-semibold mb-2">Welcome back to Nimbus CRM</h1>
+            <h1 className="display-6 fw-semibold mb-2">
+              Welcome back{user ? `, ${user.displayName.split(' ')[0]}` : ' to Nimbus CRM'}
+            </h1>
             <p className="lead mb-3">
-              {summary.openCount} open deals worth {formatMoney(summary.openValue)} are in your
-              pipeline today.
+              {summary.openCount} open deals worth {formatMoney(summary.openValue)} are in{' '}
+              {isAdmin ? 'the team’s' : 'your'} pipeline today.
             </p>
             <div className="d-flex flex-wrap gap-2">
-              <Link to="/deals/new" className="btn btn-light">
-                <i className="bi bi-plus-lg me-1" aria-hidden="true" />
-                New deal
-              </Link>
+              {isAdmin && (
+                <Link to="/deals/new" className="btn btn-light">
+                  <i className="bi bi-plus-lg me-1" aria-hidden="true" />
+                  New deal
+                </Link>
+              )}
               <Link to="/pipeline" className="btn btn-outline-light">
                 View pipeline
               </Link>

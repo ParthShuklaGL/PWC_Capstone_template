@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ApiError, deleteDeal, fetchDeal, fetchDealHistory } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import StageBadge from '../components/StageBadge.tsx';
 import StageMoveControl from '../components/StageMoveControl.tsx';
 import { formatDate, formatMoney, formatStage, formatStatus, isOpenStage } from '../constants.ts';
@@ -9,6 +10,7 @@ import type { Deal, DealHistoryEntry, LoadStatus } from '../types.ts';
 export default function DealDetailPage() {
   const { dealRef } = useParams<{ dealRef: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [history, setHistory] = useState<DealHistoryEntry[]>([]);
   const [status, setStatus] = useState<LoadStatus>('loading');
@@ -94,20 +96,22 @@ export default function DealDetailPage() {
             {deal.dealRef} · <StageBadge stage={deal.stage} />
           </div>
         </div>
-        {isOpenStage(deal.stage) && (
+        {isAdmin && isOpenStage(deal.stage) && (
           <div className="d-flex gap-2">
             <Link to={`/deals/${deal.dealRef}/edit`} className="btn btn-outline-primary">
               <i className="bi bi-pencil me-1" aria-hidden="true" />
               Edit
             </Link>
-            <button
-              type="button"
-              className="btn btn-outline-danger"
-              onClick={() => setConfirming(true)}
-            >
-              <i className="bi bi-trash me-1" aria-hidden="true" />
-              Delete
-            </button>
+            {deal.stage === 'PROSPECTING' && (
+              <button
+                type="button"
+                className="btn btn-outline-danger"
+                onClick={() => setConfirming(true)}
+              >
+                <i className="bi bi-trash me-1" aria-hidden="true" />
+                Delete
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -164,6 +168,12 @@ export default function DealDetailPage() {
                   <Link to={`/contacts/${deal.contactRef}`}>{deal.contactName}</Link>{' '}
                   <span className="badge text-bg-light border">{formatStatus(deal.contactStatus)}</span>
                 </dd>
+
+                <dt className="col-sm-4 text-secondary fw-normal">Owner</dt>
+                <dd className="col-sm-8">
+                  <i className="bi bi-person me-1" aria-hidden="true" />
+                  {deal.ownerName}
+                </dd>
               </dl>
             </div>
           </div>
@@ -189,7 +199,7 @@ export default function DealDetailPage() {
                 </ol>
               )}
               <p className="small text-secondary mt-2 mb-0">
-                The API does not record who made a move: there is no sign-in in this system.
+                The API records when a deal moved, not who moved it.
               </p>
             </div>
           </div>

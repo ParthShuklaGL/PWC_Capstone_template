@@ -6,9 +6,11 @@ import {
   fetchAccountContacts,
   fetchAccounts,
   fetchDeal,
+  fetchUsers,
   updateDeal,
 } from '../api/crm.ts';
-import type { Account, ContactSummary } from '../types.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
+import type { Account, ContactSummary, User } from '../types.ts';
 
 export default function DealFormPage() {
   const { dealRef } = useParams<{ dealRef: string }>();
@@ -23,6 +25,9 @@ export default function DealFormPage() {
   // Held as text so pennies are never lost to float rounding while typing.
   const [value, setValue] = useState('');
   const [expectedCloseDate, setExpectedCloseDate] = useState('');
+  const { user, isAdmin } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [ownerRef, setOwnerRef] = useState(user?.userRef ?? '');
   const [fields, setFields] = useState<Record<string, string>>({});
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,6 +46,7 @@ export default function DealFormPage() {
           setExpectedCloseDate(deal.expectedCloseDate);
           setAccountRef(deal.accountRef);
           setContactRef(deal.contactRef);
+          setOwnerRef(deal.ownerRef);
         }
         setLoading(false);
       })
@@ -53,6 +59,22 @@ export default function DealFormPage() {
       cancelled = true;
     };
   }, [editing, dealRef]);
+
+  // Only an admin may list users (the API answers 403 to anyone else).
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    fetchUsers()
+      .then((loaded) => {
+        if (!cancelled) setUsers(loaded);
+      })
+      .catch(() => {
+        if (!cancelled) setUsers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!accountRef || editing) return;
@@ -83,14 +105,16 @@ export default function DealFormPage() {
     setFields({});
     const amount = value.trim() === '' ? undefined : Number(value);
     const closeDate = expectedCloseDate || undefined;
+    const owner = ownerRef || undefined;
     try {
       const saved =
         editing && dealRef
-          ? await updateDeal(dealRef, { title, value: amount, expectedCloseDate: closeDate })
+          ? await updateDeal(dealRef, { title, value: amount, expectedCloseDate: closeDate, ownerRef: owner })
           : await createDeal({
               title,
               value: amount,
               expectedCloseDate: closeDate,
+              ownerRef: owner,
               accountRef,
               contactRef,
             });
@@ -231,6 +255,28 @@ export default function DealFormPage() {
               <div className="invalid-feedback">{fields.expectedCloseDate}</div>
             )}
           </div>
+
+          {users.length > 0 && (
+            <div className="col-md-6">
+              <label htmlFor="deal-owner" className="form-label">
+                Owner
+              </label>
+              <select
+                id="deal-owner"
+                className={`form-select ${invalid('ownerRef')}`}
+                value={ownerRef}
+                onChange={(event) => setOwnerRef(event.target.value)}
+              >
+                {users.map((candidate) => (
+                  <option key={candidate.userRef} value={candidate.userRef}>
+                    {candidate.displayName} ({candidate.role === 'ADMIN' ? 'Admin' : 'Sales rep'})
+                  </option>
+                ))}
+              </select>
+              {fields.ownerRef && <div className="invalid-feedback">{fields.ownerRef}</div>}
+              <div className="form-text">Only the owner (and admins) can see and move this deal.</div>
+            </div>
+          )}
         </div>
 
         <div className="card-footer bg-white d-flex gap-2">

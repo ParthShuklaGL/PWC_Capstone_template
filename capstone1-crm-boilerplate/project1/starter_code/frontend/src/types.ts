@@ -93,6 +93,9 @@ export interface Deal {
   contactRef: string;
   contactName: string;
   contactStatus: ContactStatus;
+  /** The rep who owns the deal (U-0002); a USER only ever sees their own. */
+  ownerRef: string;
+  ownerName: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -102,6 +105,8 @@ export interface DealInput {
   /** Left out when the field is blank, so the server can say it is required. */
   value?: number;
   expectedCloseDate?: string;
+  /** ADMIN only. Left out to keep the current owner (or, on create, to own it yourself). */
+  ownerRef?: string;
 }
 
 export interface DealCreateInput extends DealInput {
@@ -132,6 +137,46 @@ export interface DealHistoryEntry {
   fromStage: DealStage | null;
   toStage: DealStage;
   changedAt: string;
+}
+
+export type Role = 'ADMIN' | 'USER';
+
+export interface User {
+  userRef: string;
+  displayName: string;
+  email: string;
+  role: Role;
+}
+
+export interface LoginResponse {
+  token: string;
+  expiresAt: string;
+  user: User;
+}
+
+export interface AccountInput {
+  name: string;
+  industry?: string;
+  country?: string;
+  website?: string;
+}
+
+export interface ContactUpdateInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  jobTitle?: string;
+  status?: ContactStatus;
+}
+
+export interface ContactCreateInput {
+  accountRef: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  jobTitle?: string;
 }
 
 /** Every screen in this app is in exactly one of these states. */

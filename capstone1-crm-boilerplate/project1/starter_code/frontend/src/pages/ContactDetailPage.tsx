@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchActivities, fetchContact, fetchContactDeals } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import ActivityForm from '../components/ActivityForm.tsx';
 import StageBadge from '../components/StageBadge.tsx';
 import { formatDate, formatMoney, formatStatus } from '../constants.ts';
@@ -8,6 +9,7 @@ import type { Activity, ContactDetail, Deal, LoadStatus } from '../types.ts';
 
 export default function ContactDetailPage() {
   const { contactRef } = useParams<{ contactRef: string }>();
+  const { isAdmin } = useAuth();
   const [contact, setContact] = useState<ContactDetail | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -67,9 +69,17 @@ export default function ContactDetailPage() {
         <Link to="/contacts">← All contacts</Link>
       </p>
 
-      <h1>
-        {contact.firstName} {contact.lastName}
-      </h1>
+      <div className="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <h1>
+          {contact.firstName} {contact.lastName}
+        </h1>
+        {isAdmin && (
+          <Link to={`/contacts/${contact.contactRef}/edit`} className="btn btn-outline-primary">
+            <i className="bi bi-pencil me-1" aria-hidden="true" />
+            Edit contact
+          </Link>
+        )}
+      </div>
       <p className="subtitle">
         {contact.jobTitle ?? 'No job title recorded'} at {contact.account.name}
       </p>
@@ -98,12 +108,12 @@ export default function ContactDetailPage() {
 
         <dt>Account</dt>
         <dd>
-          {contact.account.name}
+          <Link to={`/accounts/${contact.account.accountRef}`}>{contact.account.name}</Link>
           {contact.account.industry ? ` — ${contact.account.industry}` : ''}
         </dd>
       </dl>
 
-      <h2>Deals</h2>
+      <h2>{isAdmin ? 'Deals' : 'Your deals with this contact'}</h2>
       {deals.length === 0 ? (
         <p className="notice">No deals for this contact yet.</p>
       ) : (
@@ -115,6 +125,7 @@ export default function ContactDetailPage() {
             >
               <Link to={`/deals/${deal.dealRef}`}>{deal.title}</Link>
               <span className="d-flex align-items-center gap-3">
+                <span className="small text-secondary">{deal.ownerName}</span>
                 <span>{formatMoney(deal.value)}</span>
                 <StageBadge stage={deal.stage} />
               </span>

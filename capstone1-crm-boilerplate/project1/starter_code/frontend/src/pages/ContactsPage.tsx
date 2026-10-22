@@ -1,12 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchContacts, searchContacts } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import Pagination from '../components/Pagination.tsx';
 import StatusFilter from '../components/StatusFilter.tsx';
 import { PAGE_SIZE, formatStatus, type StatusFilter as Filter } from '../constants.ts';
 import type { ContactSummary, LoadStatus } from '../types.ts';
 
 export default function ContactsPage() {
+  const { isAdmin } = useAuth();
   const [contacts, setContacts] = useState<ContactSummary[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -69,7 +71,15 @@ export default function ContactsPage() {
 
   return (
     <section>
-      <h1>Contacts</h1>
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h1 className="mb-0">Contacts</h1>
+        {isAdmin && (
+          <Link to="/contacts/new" className="btn btn-primary">
+            <i className="bi bi-person-plus me-1" aria-hidden="true" />
+            New contact
+          </Link>
+        )}
+      </div>
 
       <div className="toolbar">
         <form className="search" onSubmit={onSearch} role="search">

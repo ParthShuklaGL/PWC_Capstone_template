@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { moveDealStage } from '../api/crm.ts';
+import { useAuth } from '../auth/AuthContext.tsx';
 import StageColumn from '../components/StageColumn.tsx';
 import { formatMoney } from '../constants.ts';
 import { useDealsPipeline } from '../hooks/useDealsPipeline.ts';
@@ -8,6 +9,7 @@ import type { Deal, DealStage } from '../types.ts';
 
 export default function PipelinePage() {
   const { summary, deals, status, error, refetch } = useDealsPipeline();
+  const { isAdmin } = useAuth();
   const [moveError, setMoveError] = useState('');
 
   async function onQuickMove(deal: Deal, stage: DealStage) {
@@ -41,9 +43,9 @@ export default function PipelinePage() {
     <section>
       <div className="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
         <div>
-          <h1 className="mb-1">Pipeline</h1>
+          <h1 className="mb-1">{isAdmin ? 'Team pipeline' : 'My pipeline'}</h1>
           <p className="text-secondary mb-0">
-            Open deals: Prospecting to Negotiation
+            Open deals: Prospecting to Negotiation{isAdmin ? ', every rep' : ', the deals you own'}
           </p>
         </div>
         <div className="card shadow-sm border-0 bg-primary text-white px-4 py-2">

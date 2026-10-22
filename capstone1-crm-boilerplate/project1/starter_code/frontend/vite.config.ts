@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
-// The dev server proxies /api to the ASP.NET Core backend so the browser sees one
+// The dev server proxies /api to the Java (Spring Boot) backend on 5080 so the browser sees one
 // origin and we never have to think about CORS in development.
 export default defineConfig({
   plugins: [react()],

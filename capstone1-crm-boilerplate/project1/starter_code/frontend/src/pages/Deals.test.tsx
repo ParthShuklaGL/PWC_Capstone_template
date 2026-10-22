@@ -37,6 +37,8 @@ function deal(overrides: Partial<Deal> = {}): Deal {
     contactRef: 'C-00001',
     contactName: 'Ada Lovelace',
     contactStatus: 'PROSPECT',
+    ownerRef: 'U-0002',
+    ownerName: 'Aisha Khan',
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
     ...overrides,

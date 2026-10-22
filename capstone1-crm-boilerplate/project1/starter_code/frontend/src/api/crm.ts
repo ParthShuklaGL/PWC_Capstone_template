@@ -1,10 +1,16 @@
+import { getToken, notifyUnauthorized } from '../auth/session.ts';
 import type {
   Account,
+  AccountInput,
   Activity,
   ActivityCreateInput,
   ApiErrorBody,
+  ContactCreateInput,
   ContactDetail,
   ContactSummary,
+  ContactUpdateInput,
+  LoginResponse,
+  User,
   Deal,
   DealCreateInput,
   DealHistoryEntry,
@@ -36,10 +42,22 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // The bearer token goes on every call from here, so no component ever handles it.
+  const token = getToken();
   const response = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...init?.headers,
+    },
   });
+
+  // 401 means the session is over (expired, or never started). Sign-in itself answers
+  // 401 for a wrong password, which the login form shows instead.
+  if (response.status === 401 && path !== '/auth/login') {
+    notifyUnauthorized();
+  }
 
   if (!response.ok) {
     let body: ApiErrorBody | null = null;
@@ -61,6 +79,48 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+export function login(email: string, password: string): Promise<LoginResponse> {
+  return request<LoginResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function fetchMe(): Promise<User> {
+  return request<User>('/auth/me');
+}
+
+/** ADMIN only: everyone who can own a deal. */
+export function fetchUsers(): Promise<User[]> {
+  return request<User[]>('/users');
+}
+
+export function fetchAccount(accountRef: string): Promise<Account> {
+  return request<Account>(`/accounts/${encodeURIComponent(accountRef)}`);
+}
+
+export function createAccount(input: AccountInput): Promise<Account> {
+  return request<Account>('/accounts', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export function updateAccount(accountRef: string, input: AccountInput): Promise<Account> {
+  return request<Account>(`/accounts/${encodeURIComponent(accountRef)}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export function createContact(input: ContactCreateInput): Promise<ContactSummary> {
+  return request<ContactSummary>('/contacts', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export function updateContact(contactRef: string, input: ContactUpdateInput): Promise<ContactSummary> {
+  return request<ContactSummary>(`/contacts/${encodeURIComponent(contactRef)}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
 }
 
 export function fetchContacts(
