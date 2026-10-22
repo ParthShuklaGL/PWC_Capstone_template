@@ -1,0 +1,17 @@
+package com.nimbussales.crm.web.dto;
+
+import java.util.List;
+import java.util.function.Function;
+import org.springframework.data.domain.Page;
+
+/**
+ * A page of results. Deliberately not Spring's own Page type: that is an internal shape, and
+ * the API contract should not move when it does.
+ */
+public record PageResponse<T>(List<T> items, int page, int size, long totalElements, int totalPages) {
+
+    public static <E, T> PageResponse<T> from(Page<E> page, Function<E, T> mapper) {
+        return new PageResponse<>(page.getContent().stream().map(mapper).toList(), page.getNumber(),
+                page.getSize(), page.getTotalElements(), page.getTotalPages());
+    }
+}

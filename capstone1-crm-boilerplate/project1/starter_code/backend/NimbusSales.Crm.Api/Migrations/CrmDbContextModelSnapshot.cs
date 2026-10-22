@@ -96,6 +96,51 @@ namespace NimbusSales.Crm.Migrations
                     b.ToTable("Activities");
                 });
 
+            modelBuilder.Entity("NimbusSales.Crm.Domain.AppUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("UserRef")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("UserRef")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("NimbusSales.Crm.Domain.Contact", b =>
                 {
                     b.Property<long>("Id")
@@ -171,7 +216,7 @@ namespace NimbusSales.Crm.Migrations
                     b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateOnly?>("ClosedDate")
+                    b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("date");
 
                     b.Property<long>("ContactId")
@@ -185,12 +230,15 @@ namespace NimbusSales.Crm.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("varchar(16)");
 
-                    b.Property<DateOnly>("ExpectedCloseDate")
+                    b.Property<DateTime>("ExpectedCloseDate")
                         .HasColumnType("date");
 
                     b.Property<string>("LostReason")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
+
+                    b.Property<long?>("OwnerId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Stage")
                         .IsRequired()
@@ -216,6 +264,8 @@ namespace NimbusSales.Crm.Migrations
 
                     b.HasIndex("DealRef")
                         .IsUnique();
+
+                    b.HasIndex("OwnerId");
 
                     b.HasIndex("Stage");
 
@@ -286,9 +336,16 @@ namespace NimbusSales.Crm.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("NimbusSales.Crm.Domain.AppUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Account");
 
                     b.Navigation("Contact");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("NimbusSales.Crm.Domain.DealStageChange", b =>

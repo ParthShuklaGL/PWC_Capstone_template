@@ -30,6 +30,10 @@ public class DealResponse
     /// <summary>PROSPECT, CUSTOMER or CHURNED, as it is right now.</summary>
     public string ContactStatus { get; set; } = string.Empty;
 
+    public string OwnerRef { get; set; } = string.Empty;
+
+    public string OwnerName { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

@@ -23,7 +23,7 @@ linked, what a user sees while data loads, and what they see when it fails.*
 
 **Contract summary**
 
-*What you verified about the API by reading it (Scalar, `src/api/crm.ts`, the backend code) rather
+*What you verified about the API by reading it (Swagger UI, `api-tests.http`, the backend code) rather
 than assuming. For each thing the brief asks for: does the API support it fully, partly or not at
 all? Quote the endpoint or the file. Include the exact error shape and every error code you rely on.*
 

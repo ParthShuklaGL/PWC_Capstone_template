@@ -14,7 +14,7 @@ public class DealRepository : IDealRepository
     }
 
     public async Task<PagedResult<Deal>> ListAsync(int page, int size, DealStage? stage,
-                                                   CancellationToken ct = default)
+                                                   long? ownerId, CancellationToken ct = default)
     {
         var safePage = Math.Max(0, page);
         var safeSize = Math.Clamp(size, 1, 100);
@@ -25,7 +25,13 @@ public class DealRepository : IDealRepository
             .AsNoTracking()
             .Include(d => d.Account)
             .Include(d => d.Contact)
+            .Include(d => d.Owner)
             .AsQueryable();
+
+        if (ownerId is not null)
+        {
+            query = query.Where(d => d.OwnerId == ownerId.Value);
+        }
 
         if (stage is not null)
         {
@@ -51,27 +57,41 @@ public class DealRepository : IDealRepository
         return _db.Deals
             .Include(d => d.Account)
             .Include(d => d.Contact)
+            .Include(d => d.Owner)
             .FirstOrDefaultAsync(d => d.DealRef == dealRef, ct);
     }
 
     public async Task<IReadOnlyList<Deal>> ListByContactAsync(
-        long contactId, CancellationToken ct = default)
+        long contactId, long? ownerId, CancellationToken ct = default)
     {
-        return await _db.Deals
+        var query = _db.Deals
             .AsNoTracking()
             .Include(d => d.Account)
             .Include(d => d.Contact)
-            .Where(d => d.ContactId == contactId)
+            .Include(d => d.Owner)
+            .Where(d => d.ContactId == contactId);
+
+        if (ownerId is not null)
+        {
+            query = query.Where(d => d.OwnerId == ownerId.Value);
+        }
+
+        return await query
             .OrderBy(d => d.ExpectedCloseDate)
             .ThenBy(d => d.Id)
             .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyList<DealStageTotal>> TotalsByStageAsync(
-        CancellationToken ct = default)
+        long? ownerId, CancellationToken ct = default)
     {
-        var rows = await _db.Deals
-            .AsNoTracking()
+        var query = _db.Deals.AsNoTracking().AsQueryable();
+        if (ownerId is not null)
+        {
+            query = query.Where(d => d.OwnerId == ownerId.Value);
+        }
+
+        var rows = await query
             .GroupBy(d => d.Stage)
             .Select(g => new { Stage = g.Key, Count = g.Count(), Total = g.Sum(d => d.Value) })
             .ToListAsync(ct);

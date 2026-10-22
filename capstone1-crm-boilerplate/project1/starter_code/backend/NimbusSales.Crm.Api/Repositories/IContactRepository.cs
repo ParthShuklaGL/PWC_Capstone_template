@@ -19,6 +19,8 @@ public interface IContactRepository
 
     Task<int> CountAsync(CancellationToken ct = default);
 
+    Task<string> NextRefAsync(CancellationToken ct = default);
+
     Task AddAsync(Contact contact, CancellationToken ct = default);
 
     Task SaveChangesAsync(CancellationToken ct = default);

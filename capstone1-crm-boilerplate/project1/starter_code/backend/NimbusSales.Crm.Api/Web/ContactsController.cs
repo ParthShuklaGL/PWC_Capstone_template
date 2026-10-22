@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NimbusSales.Crm.Domain;
 using NimbusSales.Crm.Services;
@@ -60,8 +61,30 @@ public class ContactsController : ControllerBase
         return await _contactService.GetByRefAsync(contactRef, ct);
     }
 
+    [HttpPost]
+    [Authorize(Roles = UserRoles.Admin)]
+    [EndpointSummary("Add a contact to an account (ADMIN)")]
+    [ProducesResponseType(typeof(ContactSummaryResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ContactSummaryResponse>> Create(
+        [FromBody] ContactCreateRequest request, CancellationToken ct)
+    {
+        var created = await _contactService.CreateAsync(
+            request.AccountRef!,
+            request.FirstName!,
+            request.LastName!,
+            request.Email!,
+            request.Phone,
+            request.JobTitle,
+            ct);
+
+        return StatusCode(StatusCodes.Status201Created, _contactMapper.ToSummary(created));
+    }
+
     [HttpPut("{contactRef}")]
-    [EndpointSummary("Update a contact")]
+    [Authorize(Roles = UserRoles.Admin)]
+    [EndpointSummary("Update a contact (ADMIN)")]
     [ProducesResponseType(typeof(ContactSummaryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -88,9 +111,10 @@ public class ContactsController : ControllerBase
     }
 
     [HttpPost("import")]
+    [Authorize(Roles = UserRoles.Admin)]
     [Consumes("text/csv")]
     [Produces("text/plain")]
-    [EndpointSummary("Bulk import leads from the agency's monthly CSV")]
+    [EndpointSummary("Bulk import leads from the agency's monthly CSV (ADMIN)")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<string> ImportCsv(CancellationToken ct)

@@ -28,6 +28,8 @@ public class DealMapper
             ContactStatus = deal.Contact is null
                 ? string.Empty
                 : ContactMapper.ToWireStatus(deal.Contact.Status),
+            OwnerRef = deal.Owner?.UserRef ?? string.Empty,
+            OwnerName = deal.Owner?.DisplayName ?? string.Empty,
             CreatedAt = deal.CreatedAt,
             UpdatedAt = deal.UpdatedAt
         };

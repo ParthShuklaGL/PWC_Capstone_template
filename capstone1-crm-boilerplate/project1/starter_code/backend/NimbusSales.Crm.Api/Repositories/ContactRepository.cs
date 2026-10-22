@@ -91,6 +91,19 @@ public class ContactRepository : IContactRepository
 
     public Task<int> CountAsync(CancellationToken ct = default) => _db.Contacts.CountAsync(ct);
 
+    public async Task<string> NextRefAsync(CancellationToken ct = default)
+    {
+        var last = await _db.Contacts
+            .OrderByDescending(c => c.Id)
+            .Select(c => c.ContactRef)
+            .FirstOrDefaultAsync(ct);
+
+        var number = last is not null && last.Length > 2 && int.TryParse(last[2..], out var parsed)
+            ? parsed
+            : 0;
+        return $"C-{number + 1:D5}";
+    }
+
     public async Task AddAsync(Contact contact, CancellationToken ct = default) =>
         await _db.Contacts.AddAsync(contact, ct);
 

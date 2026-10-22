@@ -29,4 +29,12 @@ public class Account
     public string? Website { get; private set; }
 
     public DateTimeOffset CreatedAt { get; private set; }
+
+    public void Update(string name, string? industry, string? country, string? website)
+    {
+        Name = name;
+        Industry = industry;
+        Country = country;
+        Website = website;
+    }
 }

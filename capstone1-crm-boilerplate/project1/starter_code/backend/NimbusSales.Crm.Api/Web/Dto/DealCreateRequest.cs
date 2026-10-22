@@ -24,4 +24,7 @@ public class DealCreateRequest
     /// <summary>A calendar date, yyyy-MM-dd. Not in the past.</summary>
     [Required(ErrorMessage = "expectedCloseDate is required")]
     public DateOnly? ExpectedCloseDate { get; set; }
+
+    /// <summary>The rep who owns the deal (a userRef such as U-0002). Defaults to the caller.</summary>
+    public string? OwnerRef { get; set; }
 }

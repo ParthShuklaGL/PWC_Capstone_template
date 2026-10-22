@@ -86,4 +86,25 @@ public class ContactService : IContactService
         _audit.Updated("contact", contactRef);
         return contact;
     }
+
+    public async Task<Contact> CreateAsync(string accountRef, string firstName, string lastName,
+                                           string email, string? phone, string? jobTitle,
+                                           CancellationToken ct = default)
+    {
+        var account = await _accounts.FindByRefAsync(accountRef, ct)
+            ?? throw new AccountNotFoundException(accountRef);
+
+        var contactRef = await _contacts.NextRefAsync(ct);
+        var contact = new Contact(contactRef, account.Id, firstName, lastName, email)
+        {
+            Phone = phone,
+            JobTitle = jobTitle
+        };
+
+        await _contacts.AddAsync(contact, ct);
+        await _contacts.SaveChangesAsync(ct);
+        _audit.Created("contact", contactRef);
+
+        return await _contacts.FindByRefAsync(contactRef, ct) ?? contact;
+    }
 }

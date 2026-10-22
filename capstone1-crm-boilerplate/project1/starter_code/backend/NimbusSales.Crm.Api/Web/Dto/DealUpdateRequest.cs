@@ -15,4 +15,7 @@ public class DealUpdateRequest
 
     [Required(ErrorMessage = "expectedCloseDate is required")]
     public DateOnly? ExpectedCloseDate { get; set; }
+
+    /// <summary>Reassigns the deal to another rep. Left alone when omitted.</summary>
+    public string? OwnerRef { get; set; }
 }

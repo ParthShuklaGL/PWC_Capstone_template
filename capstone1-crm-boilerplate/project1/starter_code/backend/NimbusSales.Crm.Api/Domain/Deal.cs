@@ -34,6 +34,11 @@ public class Deal
 
     public Contact? Contact { get; set; }
 
+    /// <summary>The rep who owns the deal. A USER sees only deals they own.</summary>
+    public long? OwnerId { get; set; }
+
+    public AppUser? Owner { get; set; }
+
     public string Title { get; set; } = string.Empty;
 
     public decimal Value { get; set; }

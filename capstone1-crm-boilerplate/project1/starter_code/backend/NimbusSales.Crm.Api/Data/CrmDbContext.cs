@@ -15,9 +15,21 @@ public class CrmDbContext : DbContext
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<Deal> Deals => Set<Deal>();
     public DbSet<DealStageChange> DealStageChanges => Set<DealStageChange>();
+    public DbSet<AppUser> Users => Set<AppUser>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        var user = modelBuilder.Entity<AppUser>();
+        user.HasKey(u => u.Id);
+        user.Property(u => u.UserRef).HasMaxLength(16).IsRequired();
+        user.Property(u => u.Email).HasMaxLength(160).IsRequired();
+        user.Property(u => u.DisplayName).HasMaxLength(120).IsRequired();
+        user.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
+        user.Property(u => u.Role).HasMaxLength(20).IsRequired();
+        user.Property(u => u.CreatedAt).IsRequired();
+        user.HasIndex(u => u.UserRef).IsUnique();
+        user.HasIndex(u => u.Email).IsUnique();
+
         var account = modelBuilder.Entity<Account>();
         account.HasKey(a => a.Id);
         account.Property(a => a.AccountRef).HasMaxLength(16).IsRequired();
@@ -88,6 +100,9 @@ public class CrmDbContext : DbContext
             .HasForeignKey(d => d.AccountId).OnDelete(DeleteBehavior.Restrict);
         deal.HasOne(d => d.Contact).WithMany()
             .HasForeignKey(d => d.ContactId).OnDelete(DeleteBehavior.Restrict);
+        deal.HasOne(d => d.Owner).WithMany()
+            .HasForeignKey(d => d.OwnerId).OnDelete(DeleteBehavior.Restrict);
+        deal.HasIndex(d => d.OwnerId);
         deal.HasIndex(d => d.DealRef).IsUnique();
         deal.HasIndex(d => d.AccountId);
         deal.HasIndex(d => d.ContactId);

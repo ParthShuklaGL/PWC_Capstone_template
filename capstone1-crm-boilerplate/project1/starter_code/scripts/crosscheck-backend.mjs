@@ -48,8 +48,19 @@ function warn(label) {
   console.log(`  WARN  ${label}`);
 }
 
-async function call(method, path, body) {
+// Signed in as the admin for sections 1-5; section 6 checks every role.
+let token = null;
+const ADMIN = {
+  email: process.env.CRM_ADMIN_EMAIL ?? 'admin@nimbus.test',
+  password: process.env.CRM_ADMIN_PASSWORD ?? 'Admin#2026',
+};
+const REP_PASSWORD = process.env.CRM_REP_PASSWORD ?? 'Rep#2026';
+
+async function call(method, path, body, as = token) {
   const init = { method, headers: {} };
+  if (as) {
+    init.headers.Authorization = `Bearer ${as}`;
+  }
   if (body !== undefined) {
     init.headers['Content-Type'] = 'application/json';
     init.body = JSON.stringify(body);
@@ -91,7 +102,8 @@ async function waitForApi() {
   while (Date.now() < deadline) {
     try {
       const res = await fetch(`${BASE}/api/accounts`);
-      if (res.ok) {
+      // Any answer below 500 means the API is up (it answers 401 until you sign in).
+      if (res.status < 500) {
         return;
       }
       lastError = `HTTP ${res.status}`;
@@ -489,12 +501,117 @@ async function dealLifecycle(before) {
 console.log(`CRM backend cross-check against ${BASE}`);
 await waitForApi();
 
+async function signIn(email, password) {
+  const res = await call('POST', '/api/auth/login', { email, password }, null);
+  return res.status === 200 ? res.json.token : null;
+}
+
+// ---------------------------------------------------------------------------------------
+
+async function authAndRoles() {
+  heading('6. Sign-in, roles and deal ownership');
+
+  const anonymous = await call('GET', '/api/deals', undefined, null);
+  check('no token: GET /api/deals is 401 UNAUTHENTICATED', isError(anonymous, 401, 'UNAUTHENTICATED'), describe(anonymous));
+
+  const bad = await call('POST', '/api/auth/login', { email: ADMIN.email, password: 'wrong' }, null);
+  check('wrong password is 401 INVALID_CREDENTIALS', isError(bad, 401, 'INVALID_CREDENTIALS'), describe(bad));
+
+  const empty = await call('POST', '/api/auth/login', {}, null);
+  check('empty login is 400 VALIDATION_FAILED naming email and password', empty.status === 400 && empty.json?.fields?.email && empty.json?.fields?.password, describe(empty));
+
+  const admin = await signIn(ADMIN.email, ADMIN.password);
+  const aisha = await signIn('aisha@nimbus.test', REP_PASSWORD);
+  const ben = await signIn('ben@nimbus.test', REP_PASSWORD);
+  check('admin, aisha and ben can all sign in', admin && aisha && ben, 'a demo account could not sign in');
+  if (!(admin && aisha && ben)) {
+    return;
+  }
+
+  const me = await call('GET', '/api/auth/me', undefined, aisha);
+  check('GET /api/auth/me returns role USER for a rep', me.status === 200 && me.json?.role === 'USER' && me.json?.userRef === 'U-0002', describe(me));
+
+  const all = await call('GET', '/api/deals?size=100', undefined, admin);
+  const mine = await call('GET', '/api/deals?size=100', undefined, aisha);
+  const his = await call('GET', '/api/deals?size=100', undefined, ben);
+  const adminOwned = all.json?.items?.filter((d) => d.ownerRef === 'U-0001').length ?? 0;
+  check('admin sees every deal; the two reps see exactly the rest (admin-owned excluded)', all.json?.totalElements === mine.json?.totalElements + his.json?.totalElements + adminOwned, `${all.json?.totalElements} vs ${mine.json?.totalElements}+${his.json?.totalElements}+${adminOwned}`);
+  check('every deal a rep sees is owned by that rep', mine.json?.items?.every((d) => d.ownerRef === 'U-0002') && his.json?.items?.every((d) => d.ownerRef === 'U-0003'), 'a deal with another owner leaked');
+
+  const sumAll = await call('GET', '/api/deals/summary', undefined, admin);
+  const sumA = await call('GET', '/api/deals/summary', undefined, aisha);
+  const sumB = await call('GET', '/api/deals/summary', undefined, ben);
+  check('summary is scoped: rep open totals plus admin-owned open deals equal the admin total', cents(sumAll.json?.openValue) === cents(sumA.json?.openValue) + cents(sumB.json?.openValue) + cents(all.json?.items?.filter((d) => d.ownerRef === 'U-0001' && !['WON', 'LOST'].includes(d.stage)).reduce((s, d) => s + d.value, 0) ?? 0), `${sumAll.json?.openValue} vs ${sumA.json?.openValue}+${sumB.json?.openValue}`);
+
+  const bensDeal = his.json?.items?.find((d) => d.stage === 'PROSPECTING') ?? his.json?.items?.[0];
+  const peek = await call('GET', `/api/deals/${bensDeal.dealRef}`, undefined, aisha);
+  check("a rep asking for another rep's deal gets 404 DEAL_NOT_FOUND", isError(peek, 404, 'DEAL_NOT_FOUND'), describe(peek));
+  const peekHistory = await call('GET', `/api/deals/${bensDeal.dealRef}/history`, undefined, aisha);
+  check("...and cannot read its history either", isError(peekHistory, 404, 'DEAL_NOT_FOUND'), describe(peekHistory));
+  const steal = await call('POST', `/api/deals/${bensDeal.dealRef}/stage`, { stage: 'QUALIFIED' }, aisha);
+  check("...and cannot move it", isError(steal, 404, 'DEAL_NOT_FOUND'), describe(steal));
+
+  const createAsRep = await call('POST', '/api/deals', {}, aisha);
+  check('a rep cannot create a deal: 403 FORBIDDEN', isError(createAsRep, 403, 'FORBIDDEN'), describe(createAsRep));
+  const editAsRep = await call('PUT', `/api/deals/${bensDeal.dealRef}`, {}, ben);
+  check('a rep cannot edit a deal, even their own: 403', editAsRep.status === 403, describe(editAsRep));
+  const deleteAsRep = await call('DELETE', `/api/deals/${bensDeal.dealRef}`, undefined, ben);
+  check('a rep cannot delete a deal: 403', deleteAsRep.status === 403, describe(deleteAsRep));
+  const putContact = await call('PUT', '/api/contacts/C-00001', {}, aisha);
+  check('a rep cannot edit a contact: 403', putContact.status === 403, describe(putContact));
+  const postContact = await call('POST', '/api/contacts', {}, aisha);
+  check('a rep cannot add a contact: 403', postContact.status === 403, describe(postContact));
+  const postAccount = await call('POST', '/api/accounts', {}, aisha);
+  check('a rep cannot add an account: 403', postAccount.status === 403, describe(postAccount));
+  const users = await call('GET', '/api/users', undefined, aisha);
+  check('a rep cannot list users: 403', users.status === 403, describe(users));
+
+  const readContacts = await call('GET', '/api/contacts?page=0&size=5', undefined, aisha);
+  check('a rep can read contacts and accounts', readContacts.status === 200 && (await call('GET', '/api/accounts', undefined, aisha)).status === 200, describe(readContacts));
+
+  const logged = await call('POST', '/api/contacts/C-00001/activities', { type: 'NOTE', subject: 'Rep check-in', notes: 'crosscheck', occurredAt: new Date().toISOString() }, aisha);
+  check('a rep can log an activity', logged.status === 201, describe(logged));
+
+  const ownStage = mine.json?.items?.find((d) => d.stage === 'PROSPECTING');
+  if (ownStage) {
+    const moved = await call('POST', `/api/deals/${ownStage.dealRef}/stage`, { stage: 'QUALIFIED' }, aisha);
+    check('a rep can move their own deal', moved.status === 200 && moved.json?.stage === 'QUALIFIED', describe(moved));
+    note(`${ownStage.dealRef} was moved to QUALIFIED by Aisha`);
+  }
+
+  const adminUsers = await call('GET', '/api/users', undefined, admin);
+  check('admin can list users (3 demo accounts)', adminUsers.status === 200 && adminUsers.json?.length >= 3, describe(adminUsers));
+
+  const stamp = Date.now().toString().slice(-6);
+  const account = await call('POST', '/api/accounts', { name: `Crosscheck Co ${stamp}`, industry: 'Testing', country: 'UK' }, admin);
+  check('admin can add an account', account.status === 201 && /^A-\d{4}$/.test(account.json?.accountRef ?? ''), describe(account));
+  const contact = await call('POST', '/api/contacts', { accountRef: account.json?.accountRef, firstName: 'Cross', lastName: `Check${stamp}`, email: `cross.${stamp}@example.com` }, admin);
+  check('admin can add a contact to it', contact.status === 201 && contact.json?.contactRef, describe(contact));
+  const edited = await call('PUT', `/api/accounts/${account.json?.accountRef}`, { name: `Crosscheck Co ${stamp} Ltd`, industry: 'Testing', country: 'UK' }, admin);
+  check('admin can edit the account', edited.status === 200 && edited.json?.name?.endsWith('Ltd'), describe(edited));
+  const owned = await call('POST', '/api/deals', { title: `Owner check ${stamp}`, accountRef: account.json?.accountRef, contactRef: contact.json?.contactRef, value: 1000, expectedCloseDate: '2027-12-31', ownerRef: 'U-0003' }, admin);
+  check('admin can create a deal owned by a chosen rep', owned.status === 201 && owned.json?.ownerRef === 'U-0003', describe(owned));
+  const badOwner = await call('POST', '/api/deals', { title: 'x', accountRef: account.json?.accountRef, contactRef: contact.json?.contactRef, value: 1, expectedCloseDate: '2027-12-31', ownerRef: 'U-9999' }, admin);
+  check('an unknown ownerRef is 400 naming ownerRef', badOwner.status === 400 && badOwner.json?.fields?.ownerRef, describe(badOwner));
+  const benSees = await call('GET', `/api/deals/${owned.json?.dealRef}`, undefined, ben);
+  check('the chosen rep can open it; the other rep cannot', benSees.status === 200 && (await call('GET', `/api/deals/${owned.json?.dealRef}`, undefined, aisha)).status === 404, describe(benSees));
+  const removed = await call('DELETE', `/api/deals/${owned.json?.dealRef}`, undefined, admin);
+  check('admin can delete a PROSPECTING deal', removed.status === 204, describe(removed));
+
+  note(`left behind: account ${account.json?.accountRef} and contact ${contact.json?.contactRef} (no delete endpoint exists)`);
+}
+
 try {
+  token = await signIn(ADMIN.email, ADMIN.password);
+  if (!token) {
+    throw new Error(`Could not sign in as ${ADMIN.email}. Set CRM_ADMIN_EMAIL / CRM_ADMIN_PASSWORD if you changed the demo accounts.`);
+  }
   await existingEndpoints();
   await plantedDefects();
   const before = await dealsReadOnly();
   await dealsValidation();
   await dealLifecycle(before);
+  await authAndRoles();
 } catch (error) {
   console.error(`\nStopped early: ${error.message}`);
   process.exit(2);

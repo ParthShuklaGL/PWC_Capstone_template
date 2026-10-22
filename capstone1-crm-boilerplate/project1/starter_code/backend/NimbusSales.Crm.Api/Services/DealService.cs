@@ -1,4 +1,5 @@
 using NimbusSales.Crm.Auditing;
+using NimbusSales.Crm.Auth;
 using NimbusSales.Crm.Domain;
 using NimbusSales.Crm.Repositories;
 
@@ -9,31 +10,60 @@ public class DealService : IDealService
     private readonly IDealRepository _deals;
     private readonly IContactRepository _contacts;
     private readonly IAccountRepository _accounts;
+    private readonly IUserRepository _users;
+    private readonly ICurrentUser _current;
     private readonly CrmAuditLogger _audit;
 
     public DealService(IDealRepository deals,
                        IContactRepository contacts,
                        IAccountRepository accounts,
+                       IUserRepository users,
+                       ICurrentUser current,
                        CrmAuditLogger audit)
     {
         _deals = deals;
         _contacts = contacts;
         _accounts = accounts;
+        _users = users;
+        _current = current;
         _audit = audit;
+    }
+
+    /// <summary>Null for an admin (sees every deal); the rep's own id for a USER.</summary>
+    private long? OwnerScope => _current.IsAdmin ? null : _current.Id;
+
+    /// <summary>
+    /// A rep asking for someone else's deal gets the same 404 as for a deal that does not
+    /// exist, so the API never confirms that another rep's deal is there.
+    /// </summary>
+    private async Task<Deal> FindVisibleAsync(string dealRef, CancellationToken ct)
+    {
+        var deal = await _deals.FindByRefAsync(dealRef, ct);
+        if (deal is null || (OwnerScope is not null && deal.OwnerId != OwnerScope))
+        {
+            throw new DealNotFoundException(dealRef);
+        }
+
+        return deal;
+    }
+
+    private async Task<AppUser> FindOwnerAsync(string ownerRef, CancellationToken ct)
+    {
+        return await _users.FindByRefAsync(ownerRef, ct)
+            ?? throw new DealValidationException("ownerRef", $"ownerRef {ownerRef} is not a known user");
     }
 
     public async Task<PagedResult<Deal>> ListAsync(int page, int size, DealStage? stage,
                                                    CancellationToken ct = default)
     {
-        var found = await _deals.ListAsync(page, size, stage, ct);
+        var found = await _deals.ListAsync(page, size, stage, OwnerScope, ct);
         _audit.Listed("deal", found.Items.Count);
         return found;
     }
 
     public async Task<Deal> GetByRefAsync(string dealRef, CancellationToken ct = default)
     {
-        var deal = await _deals.FindByRefAsync(dealRef, ct)
-            ?? throw new DealNotFoundException(dealRef);
+        var deal = await FindVisibleAsync(dealRef, ct);
         _audit.Viewed("deal", dealRef);
         return deal;
     }
@@ -44,14 +74,14 @@ public class DealService : IDealService
         var contact = await _contacts.FindByRefAsync(contactRef, ct)
             ?? throw new ContactNotFoundException(contactRef);
 
-        var deals = await _deals.ListByContactAsync(contact.Id, ct);
+        var deals = await _deals.ListByContactAsync(contact.Id, OwnerScope, ct);
         _audit.Listed("deal", deals.Count);
         return deals;
     }
 
     public async Task<Deal> CreateAsync(string title, string accountRef, string contactRef,
                                         decimal value, DateOnly expectedCloseDate,
-                                        CancellationToken ct = default)
+                                        string? ownerRef, CancellationToken ct = default)
     {
         var account = await _accounts.FindByRefAsync(accountRef, ct)
             ?? throw new AccountNotFoundException(accountRef);
@@ -66,8 +96,15 @@ public class DealService : IDealService
 
         EnsureNotInThePast(expectedCloseDate);
 
+        var ownerId = string.IsNullOrWhiteSpace(ownerRef)
+            ? _current.Id
+            : (await FindOwnerAsync(ownerRef, ct)).Id;
+
         var dealRef = await _deals.NextRefAsync(ct);
-        var deal = new Deal(dealRef, account.Id, contact.Id, title, value, expectedCloseDate);
+        var deal = new Deal(dealRef, account.Id, contact.Id, title, value, expectedCloseDate)
+        {
+            OwnerId = ownerId
+        };
         await _deals.AddAsync(deal, ct);
         await _deals.SaveChangesAsync(ct);
 
@@ -83,10 +120,10 @@ public class DealService : IDealService
     }
 
     public async Task<Deal> UpdateAsync(string dealRef, string title, decimal value,
-                                        DateOnly expectedCloseDate, CancellationToken ct = default)
+                                        DateOnly expectedCloseDate, string? ownerRef,
+                                        CancellationToken ct = default)
     {
-        var deal = await _deals.FindByRefAsync(dealRef, ct)
-            ?? throw new DealNotFoundException(dealRef);
+        var deal = await FindVisibleAsync(dealRef, ct);
 
         if (DealStageRules.IsFinal(deal.Stage))
         {
@@ -96,6 +133,12 @@ public class DealService : IDealService
         if (expectedCloseDate != deal.ExpectedCloseDate)
         {
             EnsureNotInThePast(expectedCloseDate);
+        }
+
+        if (!string.IsNullOrWhiteSpace(ownerRef))
+        {
+            var owner = await FindOwnerAsync(ownerRef, ct);
+            deal.OwnerId = owner.Id;
         }
 
         deal.Title = title;
@@ -110,8 +153,7 @@ public class DealService : IDealService
 
     public async Task DeleteAsync(string dealRef, CancellationToken ct = default)
     {
-        var deal = await _deals.FindByRefAsync(dealRef, ct)
-            ?? throw new DealNotFoundException(dealRef);
+        var deal = await FindVisibleAsync(dealRef, ct);
 
         if (deal.Stage != DealStage.Prospecting)
         {
@@ -127,8 +169,7 @@ public class DealService : IDealService
                                              DateOnly? closeDate, string? lostReason,
                                              CancellationToken ct = default)
     {
-        var deal = await _deals.FindByRefAsync(dealRef, ct)
-            ?? throw new DealNotFoundException(dealRef);
+        var deal = await FindVisibleAsync(dealRef, ct);
 
         var refusal = DealStageRules.Refusal(deal.Stage, target);
         if (refusal is not null)
@@ -186,7 +227,7 @@ public class DealService : IDealService
 
     public async Task<DealSummary> SummariseAsync(CancellationToken ct = default)
     {
-        var totals = await _deals.TotalsByStageAsync(ct);
+        var totals = await _deals.TotalsByStageAsync(OwnerScope, ct);
 
         var stages = Enum.GetValues<DealStage>()
             .Select(stage => totals.FirstOrDefault(t => t.Stage == stage)
@@ -199,8 +240,7 @@ public class DealService : IDealService
     public async Task<IReadOnlyList<DealStageChange>> HistoryAsync(
         string dealRef, CancellationToken ct = default)
     {
-        var deal = await _deals.FindByRefAsync(dealRef, ct)
-            ?? throw new DealNotFoundException(dealRef);
+        var deal = await FindVisibleAsync(dealRef, ct);
 
         var changes = await _deals.ListStageChangesAsync(deal.Id, ct);
         _audit.Listed("deal-history", changes.Count);

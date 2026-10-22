@@ -4,16 +4,19 @@ namespace NimbusSales.Crm.Repositories;
 
 public interface IDealRepository
 {
-    Task<PagedResult<Deal>> ListAsync(int page, int size, DealStage? stage,
+    /// <summary>When ownerId is set, only that rep's deals are returned.</summary>
+    Task<PagedResult<Deal>> ListAsync(int page, int size, DealStage? stage, long? ownerId,
                                       CancellationToken ct = default);
 
     /// <summary>The deal, tracked, with its account and contact loaded.</summary>
     Task<Deal?> FindByRefAsync(string dealRef, CancellationToken ct = default);
 
-    Task<IReadOnlyList<Deal>> ListByContactAsync(long contactId, CancellationToken ct = default);
+    Task<IReadOnlyList<Deal>> ListByContactAsync(long contactId, long? ownerId,
+                                                 CancellationToken ct = default);
 
     /// <summary>One row per stage that has at least one deal.</summary>
-    Task<IReadOnlyList<DealStageTotal>> TotalsByStageAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<DealStageTotal>> TotalsByStageAsync(long? ownerId,
+                                                           CancellationToken ct = default);
 
     Task<string> NextRefAsync(CancellationToken ct = default);
 

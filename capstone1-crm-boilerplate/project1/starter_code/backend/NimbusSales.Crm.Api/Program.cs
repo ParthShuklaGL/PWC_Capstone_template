@@ -1,7 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NimbusSales.Crm.Auditing;
+using NimbusSales.Crm.Auth;
 using NimbusSales.Crm.Data;
 using NimbusSales.Crm.Repositories;
 using NimbusSales.Crm.Services;
@@ -38,13 +42,66 @@ builder.Services.AddSingleton<ActivityMapper>();
 builder.Services.AddSingleton<DealMapper>();
 builder.Services.AddSingleton<CrmAuditLogger>();
 
-// There is no authentication and no authorisation in this application. There is no user
-// table, no login, no token, no claim, and no concept of "the rep who owns this record".
-// Every endpoint below is open to anyone who can reach the port. That was the
-// contractor's decision in 2024 -- the CRM is only reachable on the office network --
-// and it has never been revisited. Anything that needs to know *who* is calling cannot
-// be built until authentication is added, and it would go here: an authentication
-// scheme, then UseAuthentication/UseAuthorization further down.
+// Authentication: every endpoint needs a bearer token except POST /api/auth/login, the
+// OpenAPI document and the Scalar UI. Two roles exist -- ADMIN manages data, USER is a sales
+// rep -- and a USER sees only the deals they own. The server is the authority: the UI
+// hiding a button is a convenience, never the protection.
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.Section));
+var jwt = builder.Configuration.GetSection(JwtOptions.Section).Get<JwtOptions>() ?? new JwtOptions();
+if (jwt.Key.Length < 32)
+{
+    throw new InvalidOperationException(
+        "Jwt:Key must be at least 32 characters. Set it in appsettings or the Jwt__Key environment variable.");
+}
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<TokenService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = jwt.SigningKey,
+            NameClaimType = CurrentUser.NameClaim,
+            RoleClaimType = CurrentUser.RoleClaim,
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new Dictionary<string, object>
+                {
+                    ["error"] = "UNAUTHENTICATED",
+                    ["message"] = "Sign in to continue."
+                });
+            },
+            OnForbidden = async context =>
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await context.Response.WriteAsJsonAsync(new Dictionary<string, object>
+                {
+                    ["error"] = "FORBIDDEN",
+                    ["message"] = "Your role does not allow this action."
+                });
+            }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -79,13 +136,17 @@ using (var scope = app.Services.CreateScope())
     AccountSeedData.Seed(db);
     ContactSeedData.Seed(db);
     ActivitySeedData.Seed(db);
+    UserSeedData.Seed(db);
     DealSeedData.Seed(db);
+    UserSeedData.AssignMissingOwners(db);
 }
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 // Serve OpenAPI document and Scalar UI
-app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapOpenApi().AllowAnonymous();
+app.MapScalarApiReference().AllowAnonymous();
 app.MapControllers();
 
 app.Run();

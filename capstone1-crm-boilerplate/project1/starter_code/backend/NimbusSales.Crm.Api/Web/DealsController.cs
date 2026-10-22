@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NimbusSales.Crm.Domain;
 using NimbusSales.Crm.Services;
@@ -54,7 +55,8 @@ public class DealsController : ControllerBase
     }
 
     [HttpPost]
-    [EndpointSummary("Create a deal for an account and one of its contacts")]
+    [Authorize(Roles = UserRoles.Admin)]
+    [EndpointSummary("Create a deal for an account and one of its contacts (ADMIN)")]
     [ProducesResponseType(typeof(DealResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -67,13 +69,15 @@ public class DealsController : ControllerBase
             request.ContactRef!,
             request.Value!.Value,
             request.ExpectedCloseDate!.Value,
+            request.OwnerRef,
             ct);
 
         return StatusCode(StatusCodes.Status201Created, _dealMapper.ToResponse(created));
     }
 
     [HttpPut("{dealRef}")]
-    [EndpointSummary("Edit a deal's title, value and expected close date")]
+    [Authorize(Roles = UserRoles.Admin)]
+    [EndpointSummary("Edit a deal's title, value, expected close date and owner (ADMIN)")]
     [ProducesResponseType(typeof(DealResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,13 +90,15 @@ public class DealsController : ControllerBase
             request.Title!,
             request.Value!.Value,
             request.ExpectedCloseDate!.Value,
+            request.OwnerRef,
             ct);
 
         return _dealMapper.ToResponse(updated);
     }
 
     [HttpDelete("{dealRef}")]
-    [EndpointSummary("Delete a deal. Only a PROSPECTING deal can be deleted")]
+    [Authorize(Roles = UserRoles.Admin)]
+    [EndpointSummary("Delete a deal. Only a PROSPECTING deal can be deleted (ADMIN)")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]

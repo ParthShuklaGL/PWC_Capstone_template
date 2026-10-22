@@ -7,4 +7,10 @@ public interface IAccountRepository
     Task<IReadOnlyList<Account>> ListByNameAsync(CancellationToken ct = default);
 
     Task<Account?> FindByRefAsync(string accountRef, CancellationToken ct = default);
+
+    Task<string> NextRefAsync(CancellationToken ct = default);
+
+    Task AddAsync(Account account, CancellationToken ct = default);
+
+    Task SaveChangesAsync(CancellationToken ct = default);
 }

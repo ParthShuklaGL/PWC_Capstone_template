@@ -18,4 +18,7 @@ public interface IContactService
     Task<Contact> UpdateAsync(string contactRef, string firstName, string lastName, string email,
                               string? phone, string? jobTitle, ContactStatus? status,
                               CancellationToken ct = default);
+
+    Task<Contact> CreateAsync(string accountRef, string firstName, string lastName, string email,
+                              string? phone, string? jobTitle, CancellationToken ct = default);
 }

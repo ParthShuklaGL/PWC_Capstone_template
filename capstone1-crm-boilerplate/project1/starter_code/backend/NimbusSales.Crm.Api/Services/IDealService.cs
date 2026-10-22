@@ -14,10 +14,12 @@ public interface IDealService
                                                   CancellationToken ct = default);
 
     Task<Deal> CreateAsync(string title, string accountRef, string contactRef, decimal value,
-                           DateOnly expectedCloseDate, CancellationToken ct = default);
+                           DateOnly expectedCloseDate, string? ownerRef,
+                           CancellationToken ct = default);
 
     Task<Deal> UpdateAsync(string dealRef, string title, decimal value,
-                           DateOnly expectedCloseDate, CancellationToken ct = default);
+                           DateOnly expectedCloseDate, string? ownerRef,
+                           CancellationToken ct = default);
 
     Task DeleteAsync(string dealRef, CancellationToken ct = default);
 
