@@ -14,19 +14,12 @@ real, running API.
 
 ## Start in five minutes
 
-**Option A: local MySQL 8 and JDK 21 (recommended).**
+You need MySQL 8, JDK 21 and Maven 3.9.
 
 ```bash
 mysql -u root -p < db-setup/01-create-database.mysql.sql   # once: database + crm_app user
 cd backend-java
 mvn spring-boot:run                                          # http://localhost:5080
-```
-
-**Option B: Docker (experimental: not yet verified by the course team; use Option A if it gives you trouble).**
-It starts MySQL and the API together, and you need nothing installed except Docker:
-
-```bash
-docker compose up --build        # API on http://localhost:5080, MySQL on localhost:3307
 ```
 
 Then open **http://localhost:5080/swagger-ui.html**, sign in with `POST /api/auth/login`, press

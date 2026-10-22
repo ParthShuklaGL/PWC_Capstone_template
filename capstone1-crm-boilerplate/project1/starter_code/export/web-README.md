@@ -12,7 +12,7 @@ US-07 and ADM-01 to ADM-03, as an admin and as a sales rep.
 
 ```bash
 # 1. the API (from the nimbus-crm-api repo)
-cd backend-java && mvn spring-boot:run          # or: docker compose up --build
+cd backend-java && mvn spring-boot:run        
 
 # 2. this app
 npm install
@@ -52,7 +52,3 @@ SCREENSHOTS=1 npx playwright test screenshots    # re-capture every screen into 
 Reset the database before the end-to-end run: `db-setup/02-reset-schema.mysql.sql` in the API
 repo, then restart the API.
 
-## Docker
-
-`Dockerfile` builds the app and serves it with nginx. `nginx.conf` proxies `/api/` to a
-host named `api` on port 5080 (the API's service name in the API repo's `compose.yaml`).

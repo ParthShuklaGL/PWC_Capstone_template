@@ -41,7 +41,6 @@ for (const doc of ['stakeholder-brief.md', 'user-stories.md', 'bug-CRM-142.md', 
   copy(join('docs', doc), join(api, 'docs', doc));
 }
 copy('export/api-README.md', join(api, 'README.md'));
-copy('export/compose.yaml', join(api, 'compose.yaml'));
 copy('export/api.gitignore', join(api, '.gitignore'));
 
 // --- nimbus-crm-web -------------------------------------------------------------------
