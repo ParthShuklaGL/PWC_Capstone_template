@@ -1,0 +1,222 @@
+### Nimbus CRM API: every endpoint, ready to send.
+###
+### Needs the "REST Client" extension for VS Code (humao.rest-client), or IntelliJ's HTTP client.
+### Send the three sign-in requests first: the tokens they return are reused below as
+### {{admin.response.body.token}}, {{aisha...}} and {{ben...}}.
+
+@base = http://localhost:5080/api
+
+### ----------------------------------------------------------------------------- Sign in
+
+# @name admin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@nimbus.test", "password": "Admin#2026" }
+
+###
+# @name aisha
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "aisha@nimbus.test", "password": "Rep#2026" }
+
+###
+# @name ben
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "ben@nimbus.test", "password": "Rep#2026" }
+
+### Expect 401 INVALID_CREDENTIALS
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@nimbus.test", "password": "wrong" }
+
+### Expect 400 VALIDATION_FAILED naming email and password
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{}
+
+### Who am I?
+GET {{base}}/auth/me
+Authorization: Bearer {{aisha.response.body.token}}
+
+### Expect 401 UNAUTHENTICATED: no token
+GET {{base}}/deals
+
+### Everyone who can own a deal (ADMIN only; a rep gets 403)
+GET {{base}}/users
+Authorization: Bearer {{admin.response.body.token}}
+
+### ----------------------------------------------------------------------------- Accounts
+
+GET {{base}}/accounts
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/accounts/A-0008
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/accounts/A-0008/contacts
+Authorization: Bearer {{aisha.response.body.token}}
+
+### Add an account (ADMIN)
+POST {{base}}/accounts
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "name": "Test Co", "industry": "Software", "country": "United Kingdom", "website": "https://example.com" }
+
+### Expect 403 FORBIDDEN: a rep cannot add an account
+POST {{base}}/accounts
+Authorization: Bearer {{aisha.response.body.token}}
+Content-Type: application/json
+
+{ "name": "Not allowed" }
+
+### ----------------------------------------------------------------------------- Contacts
+
+GET {{base}}/contacts?page=0&size=20
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/contacts?page=0&size=20&status=CUSTOMER
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/contacts/search?q=fenwick
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/contacts/C-00089
+Authorization: Bearer {{aisha.response.body.token}}
+
+### Add a contact (ADMIN)
+POST {{base}}/contacts
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "accountRef": "A-0008", "firstName": "Test", "lastName": "Person", "email": "test.person@example.com", "jobTitle": "Buyer" }
+
+### Edit a contact (ADMIN)
+PUT {{base}}/contacts/C-00013
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "firstName": "Piotr", "lastName": "Novotny", "email": "piotr.novotny@brightmoor.dental", "phone": "+44 20 7823 3407", "jobTitle": "Technical Director", "status": "PROSPECT" }
+
+### Bulk import (ADMIN). The file is in ../docs/sample-leads.csv
+POST {{base}}/contacts/import
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: text/csv
+
+< ../docs/sample-leads.csv
+
+### ----------------------------------------------------------------------------- Activities
+
+GET {{base}}/contacts/C-00001/activities
+Authorization: Bearer {{aisha.response.body.token}}
+
+### Log a call (any signed-in user)
+POST {{base}}/contacts/C-00001/activities
+Authorization: Bearer {{aisha.response.body.token}}
+Content-Type: application/json
+
+{ "type": "CALL", "subject": "Follow-up", "notes": "Asked for the revised quote.", "occurredAt": "2026-10-22T10:30:00Z" }
+
+### ----------------------------------------------------------------------------- Deals (reading)
+
+### A rep sees only their own deals; the admin sees all 32
+GET {{base}}/deals?page=0&size=20
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/deals?page=0&size=20&stage=NEGOTIATION
+Authorization: Bearer {{admin.response.body.token}}
+
+### Expect 400 with fields.stage
+GET {{base}}/deals?stage=NEGOTIATIONS
+Authorization: Bearer {{admin.response.body.token}}
+
+### The pipeline board numbers (scoped to the caller)
+GET {{base}}/deals/summary
+Authorization: Bearer {{admin.response.body.token}}
+
+###
+GET {{base}}/deals/D-00016
+Authorization: Bearer {{admin.response.body.token}}
+
+###
+GET {{base}}/deals/D-00016/history
+Authorization: Bearer {{admin.response.body.token}}
+
+### D-00016 is Ben's. Expect 404 for Aisha, as if it did not exist
+GET {{base}}/deals/D-00016
+Authorization: Bearer {{aisha.response.body.token}}
+
+###
+GET {{base}}/contacts/C-00003/deals
+Authorization: Bearer {{admin.response.body.token}}
+
+### ----------------------------------------------------------------------------- Deals (changing)
+
+# @name newDeal
+POST {{base}}/deals
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "title": "Fleet telematics pilot", "accountRef": "A-0008", "contactRef": "C-00001", "value": 25000, "expectedCloseDate": "2027-03-31", "ownerRef": "U-0002" }
+
+### Expect 400 naming every problem
+POST {{base}}/deals
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "title": "", "accountRef": "A-0008", "contactRef": "C-00001", "value": 0, "expectedCloseDate": "2020-01-01" }
+
+### Expect 400 fields.contactRef: C-00001 works at A-0008, not A-0001
+POST {{base}}/deals
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "title": "Wrong account", "accountRef": "A-0001", "contactRef": "C-00001", "value": 100, "expectedCloseDate": "2027-01-31" }
+
+### Edit (ADMIN)
+PUT {{base}}/deals/{{newDeal.response.body.dealRef}}
+Authorization: Bearer {{admin.response.body.token}}
+Content-Type: application/json
+
+{ "title": "Fleet telematics pilot, phase one", "value": 27500, "expectedCloseDate": "2027-04-30" }
+
+### Move one stage forward (Aisha owns it, so she may)
+POST {{base}}/deals/{{newDeal.response.body.dealRef}}/stage
+Authorization: Bearer {{aisha.response.body.token}}
+Content-Type: application/json
+
+{ "stage": "QUALIFIED" }
+
+### Expect 409 DEAL_STAGE_TRANSITION_INVALID: two stages at once
+POST {{base}}/deals/{{newDeal.response.body.dealRef}}/stage
+Authorization: Bearer {{aisha.response.body.token}}
+Content-Type: application/json
+
+{ "stage": "NEGOTIATION" }
+
+### Lose it (needs a reason)
+POST {{base}}/deals/{{newDeal.response.body.dealRef}}/stage
+Authorization: Bearer {{aisha.response.body.token}}
+Content-Type: application/json
+
+{ "stage": "LOST", "lostReason": "Budget moved to next year" }
+
+### Expect 409 DEAL_DELETE_NOT_ALLOWED: only PROSPECTING deals can be deleted
+DELETE {{base}}/deals/{{newDeal.response.body.dealRef}}
+Authorization: Bearer {{admin.response.body.token}}
+
+### Expect 403: a rep cannot delete
+DELETE {{base}}/deals/D-00001
+Authorization: Bearer {{aisha.response.body.token}}

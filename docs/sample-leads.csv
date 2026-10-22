@@ -1,0 +1,10 @@
+account_ref,first_name,last_name,email,phone,job_title
+A-0003,Rosalind,Achebe,rosalind.achebe@corvidanalytics.io,+44 20 7412 8830,Head of Data
+A-0003,Tomasz,Novotny, tomasz.novotny@corvidanalytics.io ,+44 20 7412 8831,Platform Lead
+A-0007,Bethan,Draycott,bethan.draycott@tuchet.co.uk,+44 161 555 0142,Works Manager
+A-0007,Bethan,Draycott,BETHAN.DRAYCOTT@tuchet.co.uk,+44 161 555 0142,Works Manager
+A-0012,Lars,Solberg,lars.solberg@lumen-optics.de,+49 30 5550 1188,Procurement
+A-0012,,Haverford,h.haverford@lumen-optics.de,,Quality
+A-0019,Sinead,Gallagher,sinead.gallagher-stellanfoods.se,+46 8 555 2200,Buyer
+A-0099,Emeka,Okonkwo,emeka.okonkwo@nowhere.example,+44 20 7000 0000,Director
+A-0024,Clemency,Winterbourne,clemency.winterbourne@bellhavenhotels.com,+44 20 7555 9911,Group Purchasing

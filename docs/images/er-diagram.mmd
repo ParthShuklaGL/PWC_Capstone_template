@@ -1,0 +1,93 @@
+erDiagram
+    roles ||--o{ users : "role_code"
+    users ||--o{ deals : "owns (owner_id)"
+    accounts ||--o{ contacts : "employs (account_id)"
+    accounts ||--o{ deals : "buys (account_id)"
+    contacts ||--o{ deals : "drives (contact_id + account_id)"
+    contacts ||--o{ activities : "has (contact_id)"
+    contact_statuses ||--o{ contacts : "status_code"
+    activity_types ||--o{ activities : "type_code"
+    deal_stages ||--o{ deals : "stage_code"
+    deals ||--o{ deal_stage_changes : "history (deal_id)"
+    deal_stages ||--o{ deal_stage_changes : "from_stage / to_stage"
+
+    roles {
+        varchar code PK "ADMIN, USER"
+        varchar description
+    }
+    contact_statuses {
+        varchar code PK "PROSPECT, CUSTOMER, CHURNED"
+        varchar description
+    }
+    activity_types {
+        varchar code PK "CALL, EMAIL, MEETING, NOTE"
+        varchar description
+    }
+    deal_stages {
+        varchar code PK "PROSPECTING ... LOST"
+        tinyint sort_order UK
+        boolean is_open
+    }
+    users {
+        bigint id PK
+        varchar user_ref UK "U-0001"
+        varchar email UK
+        varchar display_name
+        varchar password_hash "BCrypt"
+        varchar role_code FK
+        datetime created_at
+    }
+    accounts {
+        bigint id PK
+        varchar account_ref UK "A-0001"
+        varchar name
+        varchar industry
+        varchar country
+        varchar website
+        datetime created_at
+    }
+    contacts {
+        bigint id PK
+        varchar contact_ref UK "C-00001"
+        bigint account_id FK
+        varchar first_name
+        varchar last_name
+        varchar email
+        varchar phone
+        varchar job_title
+        varchar status_code FK
+        varchar credit_risk_note "finance only"
+        datetime last_contacted_at
+        datetime created_at
+    }
+    activities {
+        bigint id PK
+        bigint contact_id FK
+        varchar type_code FK
+        varchar subject
+        varchar notes
+        datetime occurred_at
+        datetime created_at
+    }
+    deals {
+        bigint id PK
+        varchar deal_ref UK "D-00001"
+        bigint account_id FK
+        bigint contact_id FK
+        bigint owner_id FK
+        varchar title
+        decimal value "GBP, > 0"
+        date expected_close_date
+        varchar stage_code FK
+        date closed_date
+        varchar lost_reason
+        datetime created_at
+        datetime updated_at
+    }
+    deal_stage_changes {
+        bigint id PK
+        bigint deal_id FK
+        varchar from_stage FK "NULL when created"
+        varchar to_stage FK
+        datetime changed_at
+    }

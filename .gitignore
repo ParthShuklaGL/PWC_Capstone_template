@@ -1,0 +1,10 @@
+target/
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.iml
+.idea/
+.vscode/
+*.log
+.env
